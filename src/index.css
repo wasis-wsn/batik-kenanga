@@ -1,0 +1,118 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 36 43% 96%; /* #f6efe5 derived from #e8d5bd for a slightly off-white feel */
+    --foreground: 28 53% 20%; /* #4a3b2a dark brown for text */
+    
+    --card: 0 0% 100%; /* #ffffff */
+    --card-foreground: 28 53% 20%; /* #4a3b2a */
+    
+    --popover: 0 0% 100%; /* #ffffff */
+    --popover-foreground: 28 53% 20%; /* #4a3b2a */
+    
+    --primary: 28 53% 33%; /* #83582a */
+    --primary-foreground: 36 43% 96%; /* #f6efe5 */
+    
+    --secondary: 36 43% 87%; /* #e8d5bd */
+    --secondary-foreground: 28 53% 33%; /* #83582a */
+    
+    --muted: 36 43% 92%; /* lighter #e8d5bd */
+    --muted-foreground: 28 53% 40%; /* slightly lighter #83582a */
+    
+    --accent: 36 43% 80%; /* a slightly darker #e8d5bd for accents */
+    --accent-foreground: 28 53% 33%; /* #83582a */
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 36 43% 80%; /* derived from secondary */
+    --input: 36 43% 80%; /* derived from secondary */
+    --ring: 28 53% 33%; /* #83582a */
+    
+    --radius: 0.5rem;
+  }
+ 
+  .dark {
+    --background: 28 53% 10%; /* Dark brown */
+    --foreground: 36 43% 87%; /* #e8d5bd */
+    
+    --card: 28 53% 15%; /* Slightly lighter dark brown */
+    --card-foreground: 36 43% 87%; /* #e8d5bd */
+    
+    --popover: 28 53% 15%;
+    --popover-foreground: 36 43% 87%;
+    
+    --primary: 36 43% 87%; /* #e8d5bd */
+    --primary-foreground: 28 53% 10%; /* Dark brown */
+    
+    --secondary: 28 53% 20%; 
+    --secondary-foreground: 36 43% 87%;
+    
+    --muted: 28 53% 20%;
+    --muted-foreground: 36 43% 70%;
+    
+    --accent: 28 53% 25%;
+    --accent-foreground: 36 43% 87%;
+    
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 28 53% 25%;
+    --input: 28 53% 25%;
+    --ring: 36 43% 87%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Lora', serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-montserrat;
+  }
+  .font-subheading {
+    font-family: 'Playfair Display', serif; /* Substitute for "The Seasons" */
+  }
+}
+
+.batik-bg-pattern {
+  background-image: url('https://www.transparenttextures.com/patterns/batik.png'); /* Example batik pattern */
+  opacity: 0.05;
+}
+
+.product-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px -5px hsla(var(--primary) / 0.1), 0 8px 10px -6px hsla(var(--primary) / 0.1);
+}
+
+.nav-link {
+  position: relative;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -2px;
+  left: 0;
+  background-color: hsl(var(--primary));
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+  width: 100%;
+}
