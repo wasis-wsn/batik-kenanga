@@ -7,8 +7,15 @@ import { CheckCircle } from 'lucide-react';
 const AboutPage = () => {
   return (
     <div className="bg-background font-lora">
-      <section className="relative py-20 md:py-32 bg-secondary">
-        <div className="absolute inset-0 batik-bg-pattern"></div>
+      <section className=" py-20 md:py-32">
+        <video
+          autoPlay
+          loop
+          src={companyInfo.heroVideo}
+          alt="company hero video"
+          className="absolute inset-0 w-full h-full object-cover opacity-50"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent"></div>
         <div className="container mx-auto px-4 relative text-center">
           <motion.h1 
             className="text-4xl md:text-5xl lg:text-6xl font-montserrat font-bold text-primary mb-4"
@@ -29,7 +36,7 @@ const AboutPage = () => {
         </div>
       </section>
 
-      <section className="py-16 lg:py-24">
+      <section className="py-16 lg:py-24 z-10 relative">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <motion.div
