@@ -39,16 +39,6 @@ const ProductCard = ({ product }) => {
             )}
           </div>
           <CardContent className="p-4">
-            <div className="flex items-center space-x-1 mb-2">
-              {[...Array(5)].map((_, i) => (
-                <Star 
-                  key={i} 
-                  size={14} 
-                  className={i < Math.floor(product.rating) ? "fill-primary text-primary" : "text-muted-foreground"} 
-                />
-              ))}
-              <span className="text-xs text-muted-foreground ml-1">{product.rating.toFixed(1)}</span>
-            </div>
             <h3 className="font-medium text-foreground line-clamp-1">{product.name}</h3>
             <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{product.description}</p>
             <div className="mt-2 font-semibold text-foreground">{formatCurrency(product.price)}</div>

@@ -247,7 +247,7 @@ const ProductDetailPage = () => {
                     <p className="font-medium">{product.details.origin}</p>
                   </div>
                   <div className="bg-secondary/50 p-4 rounded-md">
-                    <p className="text-sm text-muted-foreground mb-1">Asal</p>
+                    <p className="text-sm text-muted-foreground mb-1">Pewarnaan</p>
                     <p className="font-medium">{product.details.coloring}</p>
                   </div>
                 </div>
