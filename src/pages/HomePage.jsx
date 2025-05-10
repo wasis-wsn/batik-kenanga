@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, Palette, ShieldCheck, Scroll, Users, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import ProductCard from '@/ProductCard';
+import ProductCard from '@/components/ProductCard';
 import { products as allProducts } from '@/data/productData';
 import { categories as allCategories } from '@/data/categoryData';
 import { companyInfo } from '@/data/companyData';

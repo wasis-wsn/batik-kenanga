@@ -9,6 +9,8 @@ import ProductsPage from '@/pages/ProductsPage';
 import ProductDetailPage from '@/pages/ProductDetailPage';
 import CartPage from '@/pages/CartPage';
 import ContactPage from '@/pages/ContactPage';
+import CostumerPage from '@/pages/CostumerPage';
+// import NewsPage from '@/pages/NewsPage';
 import { CartProvider } from '@/contexts/CartContext';
 
 function App() {
@@ -22,6 +24,8 @@ function App() {
           <Route path="/products/:id" element={<ProductDetailPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/costumers" element={<CostumerPage />} />
+          {/* <Route path="/news" element={<NewsPage />} /> */}
         </Routes>
         <Toaster />
       </Layout>
