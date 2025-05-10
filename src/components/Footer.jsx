@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react';
@@ -36,7 +35,11 @@ const Footer = () => {
               <li><Link to="/" className="text-muted-foreground hover:text-primary transition-colors">Beranda</Link></li>
               <li><Link to="/about" className="text-muted-foreground hover:text-primary transition-colors">Tentang Kami</Link></li>
               <li><Link to="/products" className="text-muted-foreground hover:text-primary transition-colors">Produk</Link></li>
+              <li><Link to="/costumers" className="text-muted-foreground hover:text-primary transition-colors">Pelanggan Kami</Link></li>
+              <li><Link to="/news" className="text-muted-foreground hover:text-primary transition-colors">Berita</Link></li>
               <li><Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors">Kontak</Link></li>
+              <li><Link to="/privacy-policy" className="text-muted-foreground hover:text-primary transition-colors">Kebijakan Privasi</Link></li>
+              <li><Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors">Syarat & Ketentuan</Link></li>
             </ul>
           </div>
 
@@ -71,6 +74,15 @@ const Footer = () => {
 
         <div className="border-t border-border mt-10 pt-8 text-center text-muted-foreground font-lora">
           <p>&copy; {new Date().getFullYear()} Batik Kenanga. Hak Cipta Dilindungi.</p>
+          <div className="mt-2 flex justify-center space-x-4 text-sm">
+            <Link to="/privacy-policy" className="hover:text-primary transition-colors">
+              Kebijakan Privasi
+            </Link>
+            <span>•</span>
+            <Link to="/terms" className="hover:text-primary transition-colors">
+              Syarat & Ketentuan
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

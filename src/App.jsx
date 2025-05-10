@@ -11,6 +11,8 @@ import ContactPage from '@/pages/ContactPage';
 import CostumerPage from '@/pages/CostumerPage';
 import NewsPage from '@/pages/NewsPage';
 import NewsDetailPage from '@/pages/NewsDetailPage';
+import PrivacyPolicyPage from '@/pages/PrivacyPolicyPage';
+import TermsPage from '@/pages/TermsPage';
 import { CartProvider } from '@/contexts/CartContext';
 
 function App() {
@@ -27,6 +29,8 @@ function App() {
           <Route path="/costumers" element={<CostumerPage />} />
           <Route path="/news" element={<NewsPage />} />
           <Route path="/news/:slug" element={<NewsDetailPage />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
         </Routes>
         <Toaster />
       </Layout>
