@@ -1,9 +1,8 @@
 
 export const companyInfo = {
   name: "Batik Kenanga",
-  tagline: "Identitas Batik Indonesia",
+  tagline: "Bring Up Your Identity",
   established: 2008,
-  logoUrl: "/images/batik_kenanga_logo.png",
   logoUrlLight: "/images/batik_kenanga_logo.png",
   heroImage: "/images/batik_background.jpg",
   heroVideo: "/videos/video_batik_kenanga.mp4",
@@ -57,12 +56,6 @@ export const companyInfo = {
       position: "Pendiri & Maestro Batik",
       bio: "Dengan lebih dari 30 tahun pengalaman, Ibu Kenanga adalah jantung dan jiwa dari setiap desain yang lahir.",
       imageUrl: "https://images.unsplash.com/photo-1580308782063-69551a8dc68c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wzNjAzNTV8MHwxfHNlYXJjaHwxfHxlbGRlcmx5JTIwaW5kb25lc2lhbiUyMHdvbWFuJTIwYmF0aWt8ZW58MHx8fHwxNzA5NzMyNzYyfDA&ixlib=rb-4.0.3&q=80&w=1080" 
-    },
-    {
-      name: "Bapak Agung P.",
-      position: "Manajer Produksi & Kualitas",
-      bio: "Memastikan setiap detail dan kualitas batik memenuhi standar tertinggi Batik Kenanga.",
-      imageUrl: "https://images.unsplash.com/photo-1597976618063-810eb50c84b1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wzNjAzNTV8MHwxfHNlYXJjaHwxfHxpbmRvbmVzaWFuJTIwbWFuJTIwYmF0aWt8ZW58MHx8fHwxNzA5NzMyNzYyfDA&ixlib=rb-4.0.3&q=80&w=1080"
     },
   ],
 };

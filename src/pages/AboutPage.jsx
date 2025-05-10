@@ -8,12 +8,10 @@ const AboutPage = () => {
   return (
     <div className="bg-background font-lora">
       <section className=" py-20 md:py-32">
-        <video
-          autoPlay
-          loop
-          src={companyInfo.heroVideo}
-          alt="company hero video"
-          className="absolute inset-0 w-full h-full object-cover opacity-50"
+        <img
+          src={companyInfo.heroImage}
+          alt="Model mengenakan Batik Kenanga"
+          className="absolute inset-0 w-full h-full object-cover opacity-30"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent"></div>
         <div className="container mx-auto px-4 relative text-center">
@@ -138,12 +136,12 @@ const AboutPage = () => {
       <section className="py-16 lg:py-24 bg-secondary/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-montserrat font-bold text-primary mb-4">Tim Kami</h2>
+            <h2 className="text-3xl lg:text-4xl font-montserrat font-bold text-primary mb-4">Sosok Di Balik Batik Kenanga</h2>
             <p className="font-playfair-display text-xl text-muted-foreground max-w-2xl mx-auto">
               Figur-figur kunci di balik dedikasi dan kualitas Batik Kenanga.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 gap-10 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-1 gap-10 max-w-4xl mx-auto">
             {companyInfo.team.map((member, index) => (
               <motion.div
                 key={index}

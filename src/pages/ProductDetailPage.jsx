@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -6,7 +5,7 @@ import { ArrowLeft, Minus, Plus, ShoppingCart, Star, Truck, Shield, RefreshCw } 
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useCart } from '@/contexts/CartContext';
-import { products } from '@/data/products';
+import { products as allProducts } from '@/data/productData';
 import { formatCurrency } from '@/lib/utils';
 import ProductCard from '@/components/ProductCard';
 
@@ -23,13 +22,13 @@ const ProductDetailPage = () => {
     setIsLoading(true);
     
     // Find the product by id
-    const foundProduct = products.find(p => p.id === parseInt(id));
+    const foundProduct = allProducts.find(p => p.id === parseInt(id));
     
     if (foundProduct) {
       setProduct(foundProduct);
       
       // Find related products (same category, excluding current product)
-      const related = products
+      const related = allProducts
         .filter(p => p.category === foundProduct.category && p.id !== foundProduct.id)
         .slice(0, 3);
       
@@ -136,18 +135,6 @@ const ProductDetailPage = () => {
               </Link>
               <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
               
-              {/* Rating */}
-              <div className="flex items-center space-x-1 mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <Star 
-                    key={i} 
-                    size={18} 
-                    className={i < Math.floor(product.rating) ? "fill-primary text-primary" : "text-muted-foreground"} 
-                  />
-                ))}
-                <span className="text-sm text-muted-foreground ml-1">{product.rating.toFixed(1)}</span>
-              </div>
-              
               {/* Price */}
               <div className="text-2xl font-bold text-primary mb-4">
                 {formatCurrency(product.price)}
@@ -157,14 +144,6 @@ const ProductDetailPage = () => {
               <p className="text-muted-foreground mb-6">
                 {product.description}
               </p>
-              
-              {/* Stock */}
-              <div className="mb-6">
-                <p className="text-sm text-muted-foreground mb-1">Ketersediaan:</p>
-                <p className={`font-medium ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {product.stock > 0 ? `Stok Tersedia (${product.stock})` : 'Stok Habis'}
-                </p>
-              </div>
               
               {/* Quantity */}
               <div className="mb-6">
@@ -266,6 +245,10 @@ const ProductDetailPage = () => {
                   <div className="bg-secondary/50 p-4 rounded-md">
                     <p className="text-sm text-muted-foreground mb-1">Asal</p>
                     <p className="font-medium">{product.details.origin}</p>
+                  </div>
+                  <div className="bg-secondary/50 p-4 rounded-md">
+                    <p className="text-sm text-muted-foreground mb-1">Asal</p>
+                    <p className="font-medium">{product.details.coloring}</p>
                   </div>
                 </div>
               </div>

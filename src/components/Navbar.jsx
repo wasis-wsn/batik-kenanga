@@ -47,6 +47,8 @@ const Navbar = () => {
     { name: 'Beranda', path: '/' },
     { name: 'Tentang Kami', path: '/about' },
     { name: 'Produk', path: '/products' },
+    { name: 'Pelanggan Kami', path: '/costumers' },
+    { name: 'Berita', path: '/news' },
   ];
 
   return (
