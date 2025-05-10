@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, Palette, ShieldCheck, Scroll, Users, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, Palette, ShieldCheck, Scroll, Users, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ProductCard from '@/ProductCard';
 import { products as allProducts } from '@/data/productData';
@@ -12,11 +11,13 @@ import { companyInfo } from '@/data/companyData';
 const HeroSection = () => {
   return (
     <section className="relative min-h-[70vh] md:min-h-screen flex items-center justify-center text-center overflow-hidden bg-secondary">
-      <img
-        src={companyInfo.heroImage}
-        alt="Model mengenakan Batik Kenanga"
-        className="absolute inset-0 w-full h-full object-cover opacity-30"
-      />
+        <video
+          autoPlay
+          loop
+          src={companyInfo.heroVideo}
+          alt="company hero video"
+          className="absolute inset-0 w-full h-full object-cover opacity-50"
+        />
       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent"></div>
       <div className="relative z-10 container mx-auto px-4 py-20 md:py-32">
         <motion.h1
@@ -33,7 +34,7 @@ const HeroSection = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
         >
-          {companyInfo.tagline} - Wujudkan Identitas Unik Anda Bersama Kami.
+          {companyInfo.tagline} - Wujudkan Identitas Anda Bersama Kami.
         </motion.p>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -42,7 +43,7 @@ const HeroSection = () => {
           className="flex flex-col sm:flex-row gap-4 justify-center"
         >
           <Button asChild size="lg" className="font-montserrat font-semibold text-lg bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3">
-            <Link to="/products">Jelajahi Koleksi</Link>
+            <Link to="/products">Lihat Koleksi</Link>
           </Button>
           <Button asChild variant="outline" size="lg" className="font-montserrat font-semibold text-lg text-primary border-primary hover:bg-primary/10 hover:text-primary px-8 py-3">
             <Link to="/about">Tentang Kami</Link>
@@ -99,12 +100,25 @@ const CompanyProfileSection = () => {
 };
 
 const FeaturedProductsSection = () => {
-  const featuredProducts = allProducts.filter(product => product.featured).slice(0, 3);
+  const featuredProducts = allProducts.filter(product => product.featured).slice(0, 10);
+  const scrollRef = React.useRef(null);
+
+  const scroll = (direction) => {
+    const element = scrollRef.current;
+    if (element) {
+      const scrollAmount = direction === 'left' 
+        ? -element.offsetWidth / 3 
+        : element.offsetWidth / 3;
+      
+      element.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
   return (
     <section className="py-16 lg:py-24 bg-secondary/30">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
-          <div>
+        <div className="flex flex-col md:flex-row justify-between items-center mb-12">
+          <div className="text-center md:text-left">
             <h2 className="text-3xl lg:text-4xl font-montserrat font-bold text-primary">Produk Unggulan</h2>
             <p className="font-lora text-lg text-muted-foreground mt-2">Koleksi batik terbaik dari Batik Kenanga</p>
           </div>
@@ -114,10 +128,41 @@ const FeaturedProductsSection = () => {
             </Link>
           </Button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {featuredProducts.map(product => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+        <div className="relative group">
+          <div 
+            ref={scrollRef}
+            className="flex overflow-x-auto snap-x snap-mandatory scrollbar-none mx-4 px-4 scroll-smooth"
+            style={{ 
+              msOverflowStyle: 'none',
+              scrollbarWidth: 'none'
+            }}
+          >
+            <div className="flex gap-10 my-4">
+              {featuredProducts.map(product => (
+                <div 
+                  key={product.id} 
+                  className="w-[calc(100%/3-1rem)] flex-shrink-0 snap-start"
+                >
+                  <ProductCard product={product} />
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Navigation Buttons */}
+          <button 
+            onClick={() => scroll('left')}
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-12 h-12 rounded-full bg-background/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center hover:bg-background/70"
+          >
+            <ChevronLeft className="w-6 h-6 text-primary" />
+          </button>
+          
+          <button 
+            onClick={() => scroll('right')}
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-12 h-12 rounded-full bg-background/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center hover:bg-background/70"
+          >
+            <ChevronRight className="w-6 h-6 text-primary" />
+          </button>
         </div>
       </div>
     </section>

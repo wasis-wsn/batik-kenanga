@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -116,6 +115,83 @@ const ProductGrid = ({ products }) => {
   );
 };
 
+const HeroCarousel = () => {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const featuredImages = allProducts
+    .filter(product => product.featured)
+    .map(product => product.imageUrl);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % featuredImages.length);
+    }, 5000); // Change slide every 5 seconds
+
+    return () => clearInterval(timer);
+  }, [featuredImages.length]);
+
+  return (
+    <section className="relative h-[300px] md:h-[400px] overflow-hidden">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 batik-bg-pattern opacity-20 z-10"></div>
+      
+      {/* Image Carousel */}
+      {featuredImages.map((imageUrl, index) => (
+        <motion.div
+          key={index}
+          className="absolute inset-0 w-full h-full"
+          initial={{ opacity: 0, scale: 1.1 }}
+          animate={{
+            opacity: currentSlide === index ? 1 : 0,
+            scale: currentSlide === index ? 1 : 1.1,
+          }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
+        >
+          <img
+            src={imageUrl}
+            alt={`Featured Batik ${index + 1}`}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black/40"></div>
+        </motion.div>
+      ))}
+
+      {/* Content Overlay */}
+      <div className="relative z-20 h-full flex items-center justify-center">
+        <div className="container mx-auto px-4 text-center">
+          <motion.h1 
+            className="text-4xl md:text-5xl lg:text-6xl font-montserrat font-bold text-white mb-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            Koleksi <span className="text-secondary">Batik Kenanga</span>
+          </motion.h1>
+          <motion.p 
+            className="text-xl md:text-2xl font-playfair-display text-white/90 max-w-3xl mx-auto"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            Jelajahi mahakarya batik tulis, cap, dan kustom untuk setiap momen berharga Anda.
+          </motion.p>
+        </div>
+      </div>
+
+      {/* Slide Indicators */}
+      <div className="absolute bottom-6 left-0 right-0 z-20 flex justify-center gap-2">
+        {featuredImages.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentSlide(index)}
+            className={`h-1.5 rounded-full transition-all duration-300 ${
+              currentSlide === index ? 'w-8 bg-white' : 'w-2 bg-white/50'
+            }`}
+          />
+        ))}
+      </div>
+    </section>
+  );
+};
 
 const ProductsPage = () => {
   const location = useLocation();
@@ -176,27 +252,7 @@ const ProductsPage = () => {
 
   return (
     <div className="bg-background font-lora">
-      <section className="relative py-20 md:py-32 bg-secondary">
-        <div className="absolute inset-0 batik-bg-pattern"></div>
-        <div className="container mx-auto px-4 relative text-center">
-          <motion.h1 
-            className="text-4xl md:text-5xl lg:text-6xl font-montserrat font-bold text-primary mb-4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            Koleksi <span className="text-foreground">Batik Kenanga</span>
-          </motion.h1>
-          <motion.p 
-            className="text-xl md:text-2xl font-playfair-display text-muted-foreground max-w-3xl mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            Jelajahi mahakarya batik tulis, cap, dan kustom untuk setiap momen berharga Anda.
-          </motion.p>
-        </div>
-      </section>
+      <HeroCarousel />
 
       <section className="py-12 lg:py-16">
         <div className="container mx-auto px-4">

@@ -40,19 +40,9 @@ const ProductCard = ({ product }) => {
             )}
           </div>
           <CardContent className="p-5 flex-grow">
-            <div className="flex items-center space-x-1 mb-2">
-              {[...Array(5)].map((_, i) => (
-                <Star 
-                  key={i} 
-                  size={16} 
-                  className={i < Math.floor(product.rating) ? "fill-primary text-primary" : "text-muted-foreground"} 
-                />
-              ))}
-              <span className="text-xs text-muted-foreground ml-1 font-lora">({product.rating.toFixed(1)})</span>
-            </div>
             <h3 className="font-montserrat font-semibold text-lg text-foreground line-clamp-2 mb-1">{product.name}</h3>
             <p className="font-lora text-sm text-muted-foreground mt-1 line-clamp-2 mb-3">{product.description}</p>
-            <div className="mt-auto font-montserrat font-bold text-xl text-primary">{formatCurrency(product.price)}</div>
+            <div className="mt-auto font-montserrat font-bold text-xl text-primary">{formatCurrency(product.price)} / 10 Meter</div> 
           </CardContent>
           <CardFooter className="p-5 pt-0">
             <Button 
