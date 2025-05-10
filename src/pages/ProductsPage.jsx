@@ -5,7 +5,7 @@ import { Filter, X, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import ProductCard from '@/ProductCard';
+import ProductCard from '@/components/ProductCard';
 import { products as allProducts } from '@/data/productData';
 import { categories as allCategories } from '@/data/categoryData';
 
