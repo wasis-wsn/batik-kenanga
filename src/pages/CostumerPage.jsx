@@ -34,18 +34,6 @@ const TestimonialGrid = ({ testimonials }) => {
             <p className="text-sm text-primary mb-3">
               {testimonial.productName}
             </p>
-            <div className="flex items-center mb-4">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`h-4 w-4 ${
-                    i < Math.floor(testimonial.rating)
-                      ? 'text-yellow-400 fill-current'
-                      : 'text-gray-300'
-                  }`}
-                />
-              ))}
-            </div>
             <p className="text-sm text-muted-foreground line-clamp-3">
               {testimonial.feedback}
             </p>
@@ -100,6 +88,133 @@ const CostumerPage = () => {
         </div>
       </section>
 
+      {/* Custom Design Guide Section */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <h2 className="text-3xl font-montserrat font-bold mb-4">
+              Custom <span className="text-primary">Design</span> Guide
+            </h2>
+            <p className="text-muted-foreground">
+              Kami membantu Anda mewujudkan batik sesuai identitas brand dengan memperhatikan detail setiap elemen desain
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 mb-12">
+            {/* Original Brand */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="bg-card rounded-lg overflow-hidden shadow-lg"
+            >
+              <div className="p-6">
+                <h3 className="font-montserrat font-semibold mb-4">Brand Anda</h3>
+                <div className="aspect-video bg-secondary/30 rounded-lg flex items-center justify-center mb-4">
+                  <img
+                    src="/images/sample-logo.jpeg"
+                    alt="Sample Brand Logo"
+                    className="max-h-24"
+                  />
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-[#ef1c23]" />
+                    <span className="text-sm text-muted-foreground">Primary Red</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-[#64748b]" />
+                    <span className="text-sm text-muted-foreground">Secondary Gray</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Process */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="bg-card rounded-lg overflow-hidden shadow-lg"
+            >
+              <div className="p-6">
+                <h3 className="font-montserrat font-semibold mb-4">Proses Adaptasi</h3>
+                <div className="space-y-4">
+                  <div className="aspect-video bg-secondary/30 rounded-lg p-4">
+                    <div className="flex flex-col h-full justify-between">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-full bg-[#ef1c23]" />
+                          <span className="text-sm text-muted-foreground">≈ 85% match</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-full bg-[#64748b]" />
+                          <span className="text-sm text-muted-foreground">≈ 90% match</span>
+                        </div>
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-2">
+                        *Pewarnaan alami dapat menghasilkan variasi warna
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Tim desainer kami akan mengadaptasi warna brand Anda ke dalam palet warna batik yang paling mendekati
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Result */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="bg-card rounded-lg overflow-hidden shadow-lg"
+            >
+              <div className="p-6">
+                <h3 className="font-montserrat font-semibold mb-4">Hasil Akhir</h3>
+                <div className="aspect-video bg-secondary/30 rounded-lg overflow-hidden mb-4">
+                  <img
+                    src="/images/custom-result.jpeg"
+                    alt="Custom Batik Result"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Batik custom yang menggabungkan identitas brand dengan keindahan tradisional
+                </p>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Important Notes */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="bg-primary/5 rounded-lg p-6 max-w-3xl mx-auto"
+          >
+            <h4 className="font-montserrat font-medium text-primary mb-3">
+              Catatan Penting
+            </h4>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li className="flex items-start gap-2">
+                <span className="text-primary">•</span>
+                Hasil pewarnaan batik dapat bervariasi 10-20% dari warna yang diminta karena proses pewarnaan alami
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary">•</span>
+                Setiap batch produksi mungkin memiliki sedikit perbedaan warna karena sifat pewarna alami
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary">•</span>
+                Kami akan mengirimkan sampel warna untuk persetujuan sebelum produksi massal dimulai
+              </li>
+            </ul>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Featured Testimonial Carousel */}
       <section className="py-16">
         <div className="container mx-auto px-4">
@@ -132,21 +247,6 @@ const CostumerPage = () => {
 
               {/* Testimonial Content */}
               <div className="bg-card p-8 rounded-lg shadow-lg">
-                <div className="flex items-center mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`h-5 w-5 ${
-                        i < Math.floor(testimonials[activeTestimonial].rating)
-                          ? 'text-yellow-400 fill-current'
-                          : 'text-gray-300'
-                      }`}
-                    />
-                  ))}
-                  <span className="ml-2 text-sm text-muted-foreground">
-                    {testimonials[activeTestimonial].rating.toFixed(1)}/5.0
-                  </span>
-                </div>
                 <blockquote className="text-lg text-muted-foreground mb-6">
                   "{testimonials[activeTestimonial].feedback}"
                 </blockquote>

@@ -212,20 +212,45 @@ const ProductDetailPage = () => {
       <section className="py-12 bg-secondary/30">
         <div className="container mx-auto px-4">
           <Tabs defaultValue="details" className="w-full">
-            <TabsList className="w-full max-w-md mx-auto grid grid-cols-3 mb-8">
+            <TabsList className="w-full max-w-md mx-auto grid grid-cols-4 mb-8">
               <TabsTrigger value="details">Detail Produk</TabsTrigger>
               <TabsTrigger value="specifications">Spesifikasi</TabsTrigger>
+              <TabsTrigger value="process">Proses Pembuatan</TabsTrigger>
               <TabsTrigger value="care">Perawatan</TabsTrigger>
             </TabsList>
+
+            {/* Detail Tab */}
             <TabsContent value="details" className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="text-xl font-semibold mb-4">Detail Produk</h3>
-              <p className="text-muted-foreground mb-4">
+              <p className="text-muted-foreground mb-6">
                 {product.description}
               </p>
-              <p className="text-muted-foreground">
-                Batik ini dibuat dengan teknik {product.details.technique} yang membutuhkan ketelitian tinggi dan waktu pembuatan yang cukup lama. Setiap motif memiliki makna filosofis yang dalam dan mencerminkan kekayaan budaya Indonesia.
-              </p>
+              
+              {/* Detail Images */}
+              {product.details.images && product.details.images.length > 0 && (
+                <div className="space-y-6">
+                  <h4 className="font-medium text-lg mb-4">Detail Motif</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {product.details.images.map((image, index) => (
+                      <div key={index} className="space-y-2">
+                        <div className="aspect-video rounded-lg overflow-hidden">
+                          <img
+                            src={image.url}
+                            alt={image.caption}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <p className="text-sm text-muted-foreground text-center">
+                          {image.caption}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </TabsContent>
+
+            {/* Specifications Tab */}
             <TabsContent value="specifications" className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="text-xl font-semibold mb-4">Spesifikasi</h3>
               <div className="space-y-4">
@@ -253,6 +278,56 @@ const ProductDetailPage = () => {
                 </div>
               </div>
             </TabsContent>
+
+            {/* Process Tab */}
+            <TabsContent value="process" className="bg-white p-6 rounded-lg shadow-md">
+              <h3 className="text-xl font-semibold mb-4">Proses Pembuatan</h3>
+              
+              {product.details.stampingTools && product.details.stampingTools.length > 0 ? (
+                <div className="space-y-6">
+                  <h4 className="font-medium text-lg mb-4">Alat Cap yang Digunakan</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {product.details.stampingTools.map((tool) => (
+                      <div 
+                        key={tool.id}
+                        className="flex space-x-4 bg-secondary/30 p-4 rounded-lg"
+                      >
+                        <div className="w-24 h-24 flex-shrink-0">
+                          <img
+                            src={tool.image}
+                            alt={tool.name}
+                            className="w-full h-full object-cover rounded-md"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <h5 className="font-medium">{tool.name}</h5>
+                          <p className="text-sm text-muted-foreground">
+                            {tool.description}
+                          </p>
+                          <p className="text-sm">
+                            <span className="text-primary font-medium">Penggunaan: </span>
+                            {tool.usageArea}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="mt-6 p-4 bg-primary/10 rounded-lg">
+                    <p className="text-sm text-muted-foreground">
+                      <span className="text-primary font-medium">Catatan: </span>
+                      Untuk batik cap kombinasi, setiap alat cap digunakan secara cermat dan berurutan untuk menghasilkan motif yang sempurna.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-muted-foreground">
+                  Produk ini dibuat dengan teknik batik tulis tradisional tanpa menggunakan cap.
+                </p>
+              )}
+            </TabsContent>
+
+            {/* Care Tab */}
             <TabsContent value="care" className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="text-xl font-semibold mb-4">Petunjuk Perawatan</h3>
               <p className="text-muted-foreground mb-4">

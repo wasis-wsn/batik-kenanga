@@ -6,12 +6,11 @@ export const testimonials = [
       productName: "Batik Custom Keluarga Artis",
       year: 2024,
       image: "/images/customer1.jpeg",
-      rating: 5,
       feedback: "Sangat puas dengan hasil batik custom dari Batik Kenanga. Detail motifnya indah dan cocok untuk keluarga kami. Pengerjaan sangat profesional dan tepat waktu.",
       imageGallery: [
-        "/images/customer1.jpeg",
-        "/images/customer2.jpeg",
-        "/images/customer3.jpeg"
+        "/images/customer1-1.jpg",
+        "/images/customer1-2.jpg",
+        "/images/customer1-3.jpg"
       ],
       colors: [
         { name: "Coklat Kayu", hex: "#513621" },
@@ -30,12 +29,11 @@ export const testimonials = [
       productName: "Batik Eksklusif Acara Kenegaraan",
       year: 2023,
       image: "/images/customer2.jpeg",
-      rating: 5,
       feedback: "Batik Kenanga menghadirkan karya yang mencerminkan keagungan budaya Indonesia. Motif yang dirancang khusus sangat sesuai dengan acara kenegaraan.",
       imageGallery: [
-        "/images/customer1.jpeg",
-        "/images/customer2.jpeg",
-        "/images/customer3.jpeg"
+        "/images/customer2-1.jpg",
+        "/images/customer2-2.jpg",
+        "/images/customer2-3.jpg"
       ],
       colors: [
         { name: "Ungu Royal", hex: "#5E2B88" },
@@ -54,12 +52,11 @@ export const testimonials = [
       productName: "Seragam Event Organizer",
       year: 2023,
       image: "/images/customer3.jpeg",
-      rating: 4.9,
       feedback: "Tim kami tampil lebih profesional dengan seragam batik dari Batik Kenanga. Desainnya modern dan nyaman dipakai saat bekerja di berbagai event.",
       imageGallery: [
-        "/images/customer1.jpeg",
-        "/images/customer2.jpeg",
-        "/images/customer3.jpeg"
+        "/images/customer3-1.jpg",
+        "/images/customer3-2.jpg",
+        "/images/customer3-3.jpg"
       ],
       colors: [
         { name: "Hijau Kaya", hex: "#0C4151" },
