@@ -282,7 +282,7 @@ const ProductsPage = () => {
             </motion.div>
 
             <div className="lg:w-3/4">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 pb-4 border-b border-border">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 pb-4 border-b border-border">
                 <p className="text-muted-foreground font-lora mb-2 sm:mb-0">
                   Menampilkan {filteredProducts.length} dari {allProducts.length} produk
                 </p>
@@ -305,6 +305,35 @@ const ProductsPage = () => {
                   )}
                 </div>
               </div>
+              
+              {/* Add Category Description Note */}
+              {activeCategory !== 'all' && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="bg-secondary/30 rounded-lg p-4 mb-8"
+                >
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0 w-16 h-16 mr-4 overflow-hidden rounded-lg">
+                      <img 
+                        src={allCategories.find(cat => cat.id === activeCategory)?.imageUrl}
+                        alt={allCategories.find(cat => cat.id === activeCategory)?.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div>
+                      <h3 className="font-montserrat font-semibold text-lg mb-1">
+                        {allCategories.find(cat => cat.id === activeCategory)?.name}
+                      </h3>
+                      <p className="text-muted-foreground text-sm">
+                        {allCategories.find(cat => cat.id === activeCategory)?.description}
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
               <ProductGrid products={filteredProducts} />
             </div>
           </div>

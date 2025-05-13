@@ -15,7 +15,18 @@ export const products = [
       technique: "Batik Tulis",
       origin: "Solo, Indonesia",
       coloring: "Pewarna alam dari kulit kayu mahoni dan daun indigo untuk menghasilkan warna merah marun yang mendalam",
-      careInstructions: "Cuci lembut dengan tangan, gunakan lerak atau sampo bayi. Jemur di tempat teduh, setrika dengan suhu sedang."
+      careInstructions: "Cuci lembut dengan tangan, gunakan lerak atau sampo bayi. Jemur di tempat teduh, setrika dengan suhu sedang.",
+      images: [
+        {
+          url: "/images/batikdetail1.jpg",
+          caption: "Detail motif parang seling kenanga"
+        },
+        {
+          url: "/images/batikdetail2.jpg",
+          caption: "Tekstur kain primisima"
+        }
+      ],
+      stampingTools: []
     }
   },
   {
@@ -110,7 +121,37 @@ export const products = [
       technique: "Batik Tulis Halus",
       origin: "Workshop Batik Kenanga",
       coloring: "Pewarna alam dan sintetis, kombinasi untuk menghasilkan warna yang kaya dan mendalam",
-      careInstructions: "Dry clean sangat direkomendasikan untuk menjaga kehalusan sutra dan warna."
+      careInstructions: "Dry clean sangat direkomendasikan untuk menjaga kehalusan sutra dan warna.",
+      images: [
+        {
+          url: "/images/batikdetail1.jpg",
+          caption: "Detail motif kenanga"
+        },
+        {
+          url: "/images/batikdetail2.jpg",
+          caption: "Detail motif parang"
+        },
+        {
+          url: "/images/batikdetail3.jpg",
+          caption: "Proses pencantingan"
+        }
+      ],
+      stampingTools: [
+        {
+          id: "cap1",
+          name: "Cap Kenanga Klasik",
+          image: "/images/cap_kenanga1.jpg",
+          description: "Cap tembaga motif kenanga ukuran 20x20cm",
+          usageArea: "Motif utama"
+        },
+        {
+          id: "cap2",
+          name: "Cap Parang Rusak",
+          image: "/images/cap_kenanga2.jpg",
+          description: "Cap tembaga motif parang ukuran 15x25cm",
+          usageArea: "Motif pendukung"
+        }
+      ]
     }
   },
   {
