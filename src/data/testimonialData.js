@@ -12,6 +12,7 @@ export const testimonials = [
         "/images/customer1-2.jpg",
         "/images/customer1-3.jpg"
       ],
+      logo: "/images/sample-logo.jpeg",
       colors: [
         { name: "Coklat Kayu", hex: "#513621" },
         { name: "Emas", hex: "#C3793A" },
@@ -35,6 +36,7 @@ export const testimonials = [
         "/images/customer2-2.jpg",
         "/images/customer2-3.jpg"
       ],
+      logo: "/images/sample-logo.jpeg",
       colors: [
         { name: "Ungu Royal", hex: "#5E2B88" },
         { name: "Ungu", hex: "#A374C5" },
@@ -58,6 +60,7 @@ export const testimonials = [
         "/images/customer3-2.jpg",
         "/images/customer3-3.jpg"
       ],
+      logo: "/images/sample-logo.jpeg",
       colors: [
         { name: "Hijau Kaya", hex: "#0C4151" },
         { name: "Jambu", hex: "#D1A9A7" },

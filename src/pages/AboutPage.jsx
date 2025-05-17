@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { companyInfo } from '@/data/companyData'; 
@@ -136,12 +135,14 @@ const AboutPage = () => {
       <section className="py-16 lg:py-24 bg-secondary/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-montserrat font-bold text-primary mb-4">Sosok Di Balik Batik Kenanga</h2>
+            <h2 className="text-3xl lg:text-4xl font-montserrat font-bold text-primary mb-4">
+              Sosok Di Balik Batik Kenanga
+            </h2>
             <p className="font-playfair-display text-xl text-muted-foreground max-w-2xl mx-auto">
-              Figur-figur kunci di balik dedikasi dan kualitas Batik Kenanga.
+              Figur-figur kunci yang membangun dan mengembangkan warisan Batik Kenanga.
             </p>
           </div>
-          <div className="grid md:grid-cols-1 gap-10 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-10 max-w-4xl mx-auto">
             {companyInfo.team.map((member, index) => (
               <motion.div
                 key={index}
@@ -156,8 +157,15 @@ const AboutPage = () => {
                 </div>
                 <div className="p-6 sm:w-2/3">
                   <h3 className="font-montserrat font-bold text-2xl text-foreground">{member.name}</h3>
-                  <p className="font-playfair-display text-lg text-primary mb-3">{member.position}</p>
-                  <p className="text-muted-foreground leading-relaxed">{member.bio}</p>
+                  <div className="space-y-2">
+                    <p className="font-playfair-display text-lg text-primary">{member.position}</p>
+                    <p className="text-sm text-muted-foreground font-medium italic">
+                      {member.period}
+                    </p>
+                  </div>
+                  <div className="mt-3 border-t border-border pt-3">
+                    <p className="text-muted-foreground leading-relaxed">{member.bio}</p>
+                  </div>
                 </div>
               </motion.div>
             ))}
