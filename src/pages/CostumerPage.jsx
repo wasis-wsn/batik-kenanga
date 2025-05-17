@@ -254,20 +254,44 @@ const CostumerPage = () => {
                 {/* Color Information Section */}
                 <div className="mb-6">
                   <h4 className="font-montserrat font-medium text-foreground mb-3">
-                    Warna Yang Digunakan
+                    Logo & Warna Yang Digunakan
                   </h4>
-                  <div className="flex items-center gap-4 mb-4">
-                    {testimonials[activeTestimonial].colors?.map((color, index) => (
-                      <div key={index} className="flex flex-col items-center">
-                        <div
-                          className="w-8 h-8 rounded-full border border-border"
-                          style={{ backgroundColor: color.hex }}
-                        />
-                        <span className="text-xs text-muted-foreground mt-1">
-                          {color.name}
-                        </span>
+                  <div className="flex items-start gap-8">
+                    {/* Logo Section */}
+                    {testimonials[activeTestimonial].logo && (
+                      <div className="w-32 flex-shrink-0">
+                        <div className="aspect-square bg-secondary/30 rounded-lg p-4 flex items-center justify-center">
+                          <img
+                            src={testimonials[activeTestimonial].logo}
+                            alt={`Logo ${testimonials[activeTestimonial].customerName}`}
+                            className="max-w-full max-h-full object-contain"
+                          />
+                        </div>
+                        <p className="text-xs text-muted-foreground text-center mt-2">
+                          Logo Original
+                        </p>
                       </div>
-                    ))}
+                    )}
+
+                    {/* Colors Section */}
+                    <div className="flex-1">
+                      <div className="flex items-center gap-4">
+                        {testimonials[activeTestimonial].colors?.map((color, index) => (
+                          <div key={index} className="flex flex-col items-center">
+                            <div
+                              className="w-8 h-8 rounded-full border border-border"
+                              style={{ backgroundColor: color.hex }}
+                            />
+                            <span className="text-xs text-muted-foreground mt-1">
+                              {color.name}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-3">
+                        *Warna yang digunakan dalam produk batik
+                      </p>
+                    </div>
                   </div>
                 </div>
 

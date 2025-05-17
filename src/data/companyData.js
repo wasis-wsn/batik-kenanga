@@ -1,4 +1,3 @@
-
 export const companyInfo = {
   name: "Batik Kenanga",
   tagline: "Bring Up Your Identity",
@@ -52,10 +51,18 @@ export const companyInfo = {
   ],
   team: [
     {
+      name: "Alm. Ibu Ratna Kenanga",
+      position: "Pendiri Pertama",
+      period: "1999 - 2007",
+      bio: "Pencetus visi Batik Kenanga yang meletakkan fondasi kuat untuk pelestarian dan inovasi batik tradisional. Warisan beliau dalam teknik dan filosofi batik tetap menjadi panduan utama kami hingga kini.",
+      imageUrl: "https://images.unsplash.com/photo-1580308782063-69551a8dc68c"
+    },
+    {
       name: "Ibu Kenanga Sari",
       position: "Pendiri & Maestro Batik",
-      bio: "Dengan lebih dari 30 tahun pengalaman, Ibu Kenanga adalah jantung dan jiwa dari setiap desain yang lahir.",
-      imageUrl: "https://images.unsplash.com/photo-1580308782063-69551a8dc68c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wzNjAzNTV8MHwxfHNlYXJjaHwxfHxlbGRlcmx5JTIwaW5kb25lc2lhbiUyMHdvbWFuJTIwYmF0aWt8ZW58MHx8fHwxNzA5NzMyNzYyfDA&ixlib=rb-4.0.3&q=80&w=1080" 
-    },
+      period: "2007 - Sekarang",
+      bio: "Melanjutkan warisan Ibu Ratna dengan memadukan tradisi dan inovasi. Dengan lebih dari 30 tahun pengalaman, Ibu Kenanga adalah jantung dan jiwa dari setiap desain yang lahir di era modern Batik Kenanga.",
+      imageUrl: "https://images.unsplash.com/photo-1580308782063-69551a8dc68c"
+    }
   ],
 };
