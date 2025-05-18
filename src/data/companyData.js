@@ -1,7 +1,7 @@
 export const companyInfo = {
   name: "Batik Kenanga",
   tagline: "Bring Up Your Identity",
-  established: 2008,
+  established: 2009,
   logoUrlLight: "/images/batik_kenanga_logo.png",
   heroImage: "/images/batik_background.jpg",
   heroVideo: "/videos/video_batik_kenanga.mp4",
