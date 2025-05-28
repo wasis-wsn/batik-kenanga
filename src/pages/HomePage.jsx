@@ -65,7 +65,7 @@ const CompanyProfileSection = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            <h2 className="text-3xl lg:text-4xl font-montserrat font-bold text-primary mb-4">Profil Singkat Batik Kenanga</h2>
+            <h2 className="text-3xl lg:text-4xl font-montserrat font-bold text-primary mb-4">Bring Up Your Identity</h2>
             <p className="font-playfair-display text-xl text-foreground mb-6">{companyInfo.tagline}</p>
             <p className="font-lora text-lg text-muted-foreground mb-6 leading-relaxed">
               {companyInfo.profileSingkat}
@@ -84,7 +84,7 @@ const CompanyProfileSection = () => {
             className="relative"
           >
             <div className="rounded-lg overflow-hidden shadow-2xl aspect-[4/3]">
-              <img  alt="Proses pembuatan Batik Kenanga" className="w-full h-full object-cover" src="https://images.unsplash.com/photo-1666578296079-52024f45d962" />
+              <img  alt="Proses pembuatan Batik Kenanga" className="w-full h-full object-cover" src={companyInfo.profileImage} />
             </div>
             <div className="absolute -bottom-4 -right-4 md:-bottom-6 md:-right-6 bg-card p-4 rounded-lg shadow-xl max-w-xs border border-secondary">
                 <div className="flex items-center space-x-2 text-primary font-semibold font-montserrat">
