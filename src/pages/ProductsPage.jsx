@@ -1,21 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Filter, X, Search } from 'lucide-react';
+import { Filter, X, Search, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import ProductCard from '@/components/ProductCard';
 import { products as allProducts } from '@/data/productData';
-import { categories as allCategories } from '@/data/categoryData';
+import { categories as allCategories, colors as allColors, capPatterns as allCapPatterns, tiedyePatterns as allTiedyePatterns } from '@/data/categoryData';
 
 const FilterSidebar = ({ 
   activeCategory, 
   searchTerm, 
-  priceRange, 
+  priceRange,
+  activeColors,
+  activeCapPatterns,
+  activeTiedyePatterns,
   handleCategoryChange, 
   handleSearchChange, 
-  handlePriceChange, 
+  handlePriceChange,
+  handleColorChange,
+  handleCapPatternChange,
+  handleTiedyePatternChange,
   handleResetFilters 
 }) => {
   const priceOptions = [
@@ -70,7 +83,84 @@ const FilterSidebar = ({
         </div>
       </div>
 
-      <div>
+      <Accordion type="multiple" className="w-full space-y-4">
+        <AccordionItem value="colors" className="border-none">
+          <AccordionTrigger className="font-montserrat font-medium text-foreground hover:no-underline">
+            Warna
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-2 pt-2">
+              {allColors.map(color => (
+                <div key={color.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`color-${color.id}`}
+                    checked={activeColors.includes(color.id)}
+                    onCheckedChange={() => handleColorChange(color.id)}
+                  />
+                  <label
+                    htmlFor={`color-${color.id}`}
+                    className="text-sm font-lora text-muted-foreground cursor-pointer"
+                  >
+                    {color.name}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="capPatterns" className="border-none">
+          <AccordionTrigger className="font-montserrat font-medium text-foreground hover:no-underline">
+            Motif Cap
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-2 pt-2">
+              {allCapPatterns.map(pattern => (
+                <div key={pattern.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`cap-${pattern.id}`}
+                    checked={activeCapPatterns.includes(pattern.id)}
+                    onCheckedChange={() => handleCapPatternChange(pattern.id)}
+                  />
+                  <label
+                    htmlFor={`cap-${pattern.id}`}
+                    className="text-sm font-lora text-muted-foreground cursor-pointer"
+                  >
+                    {pattern.name}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="tiedyePatterns" className="border-none">
+          <AccordionTrigger className="font-montserrat font-medium text-foreground hover:no-underline">
+            Motif Tie Dye
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-2 pt-2">
+              {allTiedyePatterns.map(pattern => (
+                <div key={pattern.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`tiedye-${pattern.id}`}
+                    checked={activeTiedyePatterns.includes(pattern.id)}
+                    onCheckedChange={() => handleTiedyePatternChange(pattern.id)}
+                  />
+                  <label
+                    htmlFor={`tiedye-${pattern.id}`}
+                    className="text-sm font-lora text-muted-foreground cursor-pointer"
+                  >
+                    {pattern.name}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+
+      <div className="mt-6">
         <h3 className="font-montserrat font-medium mb-3 text-foreground">Rentang Harga</h3>
         <div className="space-y-2 font-lora">
           {priceOptions.map(option => (
@@ -203,14 +293,28 @@ const ProductsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [priceRange, setPriceRange] = useState([0, 10000000]);
   const [showFilters, setShowFilters] = useState(false);
+  const [activeColors, setActiveColors] = useState([]);
+  const [activeCapPatterns, setActiveCapPatterns] = useState([]);
+  const [activeTiedyePatterns, setActiveTiedyePatterns] = useState([]);
 
   useEffect(() => {
     let updatedProducts = [...allProducts];
 
+    // Category filter
     if (activeCategory !== 'all') {
-      updatedProducts = updatedProducts.filter(product => product.category === activeCategory);
+      updatedProducts = updatedProducts.filter(product => {
+        if (activeCategory === 'batik-kenanga-collection') {
+          return product.colors.length === 1 && product.capPatterns.length === 1 && product.tiedyePatterns.length === 0;
+        } else if (activeCategory === 'custom-color') {
+          return product.colors.length > 1;
+        } else if (activeCategory === 'custom-design') {
+          return product.colors.length > 1 || product.capPatterns.length > 1 || product.tiedyePatterns.length > 0;
+        }
+        return product.category === activeCategory;
+      });
     }
 
+    // Search filter
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       updatedProducts = updatedProducts.filter(
@@ -220,34 +324,83 @@ const ProductsPage = () => {
       );
     }
 
+    // Price range filter
     updatedProducts = updatedProducts.filter(
       product => product.price >= priceRange[0] && product.price <= priceRange[1]
     );
 
+    // Color filter
+    if (activeColors.length > 0) {
+      updatedProducts = updatedProducts.filter(product =>
+        product.colors.some(color => activeColors.includes(color))
+      );
+    }
+
+    // Cap pattern filter
+    if (activeCapPatterns.length > 0) {
+      updatedProducts = updatedProducts.filter(product =>
+        product.capPatterns.some(pattern => activeCapPatterns.includes(pattern))
+      );
+    }
+
+    // Tie-dye pattern filter
+    if (activeTiedyePatterns.length > 0) {
+      updatedProducts = updatedProducts.filter(product =>
+        product.tiedyePatterns.some(pattern => activeTiedyePatterns.includes(pattern))
+      );
+    }
+
     setFilteredProducts(updatedProducts);
-  }, [activeCategory, searchTerm, priceRange]);
+  }, [activeCategory, searchTerm, priceRange, activeColors, activeCapPatterns, activeTiedyePatterns]);
 
   useEffect(() => {
     if (categoryParam) {
       setActiveCategory(categoryParam);
     } else {
-      setActiveCategory('all'); 
+      setActiveCategory('all');
     }
   }, [categoryParam]);
-
 
   const handleCategoryChange = (category) => setActiveCategory(category);
   const handleSearchChange = (e) => setSearchTerm(e.target.value);
   const handlePriceChange = (min, max) => setPriceRange([min, max]);
+  
+  const handleColorChange = (colorId) => {
+    setActiveColors(prev => 
+      prev.includes(colorId) 
+        ? prev.filter(id => id !== colorId)
+        : [...prev, colorId]
+    );
+  };
+
+  const handleCapPatternChange = (patternId) => {
+    setActiveCapPatterns(prev => 
+      prev.includes(patternId)
+        ? prev.filter(id => id !== patternId)
+        : [...prev, patternId]
+    );
+  };
+
+  const handleTiedyePatternChange = (patternId) => {
+    setActiveTiedyePatterns(prev => 
+      prev.includes(patternId)
+        ? prev.filter(id => id !== patternId)
+        : [...prev, patternId]
+    );
+  };
+
   const handleResetFilters = () => {
     setActiveCategory('all');
     setSearchTerm('');
     setPriceRange([0, 10000000]);
+    setActiveColors([]);
+    setActiveCapPatterns([]);
+    setActiveTiedyePatterns([]);
     const params = new URLSearchParams(location.search);
     params.delete('category');
     window.history.replaceState({}, '', `${location.pathname}?${params.toString()}`);
-
   };
+
   const toggleFilters = () => setShowFilters(!showFilters);
 
   return (
@@ -274,15 +427,21 @@ const ProductsPage = () => {
                 activeCategory={activeCategory}
                 searchTerm={searchTerm}
                 priceRange={priceRange}
+                activeColors={activeColors}
+                activeCapPatterns={activeCapPatterns}
+                activeTiedyePatterns={activeTiedyePatterns}
                 handleCategoryChange={handleCategoryChange}
                 handleSearchChange={handleSearchChange}
                 handlePriceChange={handlePriceChange}
+                handleColorChange={handleColorChange}
+                handleCapPatternChange={handleCapPatternChange}
+                handleTiedyePatternChange={handleTiedyePatternChange}
                 handleResetFilters={handleResetFilters}
               />
             </motion.div>
 
             <div className="lg:w-3/4">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 pb-4 border-b border-border">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 pb-4 border-b border-border">
                 <p className="text-muted-foreground font-lora mb-2 sm:mb-0">
                   Menampilkan {filteredProducts.length} dari {allProducts.length} produk
                 </p>
@@ -295,6 +454,30 @@ const ProductsPage = () => {
                       </button>
                     </div>
                   )}
+                  {activeColors.map(colorId => (
+                    <div key={colorId} className="bg-primary/10 text-primary text-sm py-1.5 px-3 rounded-full flex items-center font-lora">
+                      {allColors.find(c => c.id === colorId)?.name}
+                      <button onClick={() => handleColorChange(colorId)} className="ml-2 focus:outline-none">
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                  {activeCapPatterns.map(patternId => (
+                    <div key={patternId} className="bg-primary/10 text-primary text-sm py-1.5 px-3 rounded-full flex items-center font-lora">
+                      {allCapPatterns.find(p => p.id === patternId)?.name}
+                      <button onClick={() => handleCapPatternChange(patternId)} className="ml-2 focus:outline-none">
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                  {activeTiedyePatterns.map(patternId => (
+                    <div key={patternId} className="bg-primary/10 text-primary text-sm py-1.5 px-3 rounded-full flex items-center font-lora">
+                      {allTiedyePatterns.find(p => p.id === patternId)?.name}
+                      <button onClick={() => handleTiedyePatternChange(patternId)} className="ml-2 focus:outline-none">
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
                   {searchTerm && (
                     <div className="bg-primary/10 text-primary text-sm py-1.5 px-3 rounded-full flex items-center font-lora">
                       "{searchTerm}"
@@ -306,7 +489,6 @@ const ProductsPage = () => {
                 </div>
               </div>
               
-              {/* Add Category Description Note */}
               {activeCategory !== 'all' && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
