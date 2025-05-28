@@ -1,14 +1,15 @@
 export const companyInfo = {
   name: "Batik Kenanga",
-  tagline: "Bring Up Your Identity",
-  established: 2009,
+  tagline: "Batik bukan hanya sekedar motif, tapi proses",
+  established: 1998,
   logoUrlLight: "/images/batik_kenanga_logo.png",
   heroImage: "/images/batik_background.jpg",
   heroVideo: "/videos/video_batik_kenanga.mp4",
-  profileImage: "https://images.unsplash.com/photo-1632198007630-64a196aceeca?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wzNjAzNTV8MHwxfHNlYXJjaHwxfHxiYXRpayUyMHdvcmtzaG9wfGVufDB8fHx8MTcwOTczMjQzNXww&ixlib=rb-4.0.3&q=80&w=1080",
+  homePageImage: "/images/home_page_batik.jpg",
+  profileImage: "https://images.unsplash.com/photo-1666578296079-52024f45d962",
   mission: "Melestarikan warisan adiluhung batik Nusantara seraya berinovasi untuk memenuhi kebutuhan identitas personal dan korporat masa kini.",
   vision: "Menjadi rujukan utama batik kustom berkualitas tinggi yang merepresentasikan keindahan dan keragaman budaya Indonesia di kancah global.",
-  profileSingkat: "Batik Kenanga, berakar di Solo, jantung budaya Jawa, berdedikasi untuk mempersembahkan keindahan batik otentik. Kami menggabungkan pakem tradisional dengan sentuhan modern, menawarkan koleksi eksklusif serta layanan kustomisasi untuk batik yang benar-benar mencerminkan identitas Anda atau organisasi Anda. Setiap helai kain adalah cerita, ditenun dengan passion dan keahlian turun-temurun.",
+  profileSingkat: "Bring Up Your Identity adalah filosofi Batik Kenanga yang mengajak setiap individu dan institusi mengekspresikan jati diri melalui batik. Melalui layanan kustomisasi warna dan motif, kami membantu Anda menciptakan batik yang merepresentasikan kepribadian, nilai, atau brand Anda. Kami percaya setiap orang berhak tampil dengan versi terbaik dirinya tanpa kehilangan akar budaya.",
   values: [
     {
       title: "Otentisitas",

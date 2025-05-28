@@ -43,14 +43,8 @@ const AboutPage = () => {
               transition={{ duration: 0.6 }}
             >
               <h2 className="text-3xl lg:text-4xl font-montserrat font-bold text-primary mb-6">Cerita Kami</h2>
-              <p className="text-lg text-muted-foreground mb-4 leading-relaxed">
-                Didirikan pada tahun {companyInfo.established}, Batik Kenanga lahir dari kecintaan mendalam terhadap warisan budaya batik Indonesia. Berawal dari sebuah sanggar kecil di Solo, kami bertumbuh dengan misi untuk tidak hanya melestarikan keindahan batik klasik, tetapi juga mengembangkannya agar relevan dengan zaman.
-              </p>
-              <p className="text-lg text-muted-foreground mb-4 leading-relaxed">
-                Kami percaya bahwa setiap helai batik adalah kanvas cerita, sebuah medium ekspresi identitas yang unik. Oleh karena itu, kami berdedikasi untuk menghasilkan karya batik berkualitas tinggi, baik melalui koleksi siap pakai maupun layanan kustomisasi yang memungkinkan Anda memiliki batik yang benar-benar personal.
-              </p>
               <p className="text-lg text-muted-foreground leading-relaxed">
-                Di Batik Kenanga, tradisi bertemu inovasi. Para pengrajin ahli kami bekerja dengan ketelitian tinggi, menggunakan teknik turun-temurun yang dipadukan dengan desain kontemporer untuk menciptakan mahakarya batik yang tak lekang oleh waktu.
+                Batik Kenanga adalah  perusahaan batik yang berdiri di Mojolaban, Sukoharjo, pada tahun {companyInfo.established}. Batik Kenanga memiliki tagline orisinalitas, loyalitas, kualitas. Batik kenanga merupakan batik dengan proses pembuatan tradisional dengan alat cap. Batik Kenanga ingin membawa image batik yang sebenarnya yaitu “Batik bukan hanya sekedar motif tetapi batik adalah  proses”. Dalam proses produksi Batik Kenanga menganut sistem kekeluargaan sehingga rata-rata pekerja yang bekerja merupakan pegawai yang sudah lama bekerja untuk Batik Kenanga. Sejak didirikan Batik Kenanga menyasar beberapa target pasar termasuk lokal dan internasional dalam skala besar. Untuk ekspor Batik Kenanga bekerjasama dengan PT. Aneka Sandang Interbuana, untuk lokal Batik Kenanga bekerjasama dengan Batik Danar Hadi sebagai supplier.
               </p>
             </motion.div>
             <motion.div
@@ -60,8 +54,8 @@ const AboutPage = () => {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="relative"
             >
-              <div className="rounded-lg overflow-hidden shadow-2xl aspect-square">
-                <img  alt="Pengrajin Batik Kenanga sedang bekerja" className="w-full h-full object-cover" src="https://images.unsplash.com/photo-1666578296079-52024f45d962" />
+              <div className="rounded-lg overflow-hidden shadow-2xl aspect-[4/3]">
+                <img  alt="Pengrajin Batik Kenanga sedang bekerja" className="w-full h-full object-cover" src={companyInfo.homePageImage} />
               </div>
                <div className="absolute -bottom-5 -left-5 bg-card p-4 rounded-lg shadow-xl max-w-sm border border-secondary">
                 <p className="font-playfair-display text-lg font-semibold text-primary">
