@@ -6,18 +6,23 @@ import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/ProductCard';
 import { products as allProducts } from '@/data/productData';
 import { categories as allCategories } from '@/data/categoryData';
-import { companyInfo } from '@/data/companyData';
+import { useHomepageContent } from '@/hooks/useCompanyInfo';
+const heroVideo = "/videos/video_batik_kenanga.mp4";
 
-const HeroSection = () => {
+const HeroSection = ({ companyInfo }) => {
+  if (!companyInfo) return null;
+  
   return (
     <section className="relative min-h-[70vh] md:min-h-screen flex items-center justify-center text-center overflow-hidden bg-secondary">
         <video
           autoPlay
           loop
-          src={companyInfo.heroVideo}
-          alt="company hero video"
+          muted
+          playsInline
+          src={heroVideo}
           className="absolute inset-0 w-full h-full object-cover opacity-50"
         />
+      )
       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent"></div>
       <div className="relative z-10 container mx-auto px-4 py-20 md:py-32">
         <motion.h1
@@ -26,7 +31,7 @@ const HeroSection = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          Batik Kenanga
+          {companyInfo.name}
         </motion.h1>
         <motion.p
           className="font-playfair-display text-2xl md:text-3xl text-foreground mb-10 max-w-3xl mx-auto"
@@ -54,7 +59,9 @@ const HeroSection = () => {
   );
 };
 
-const CompanyProfileSection = () => {
+const CompanyProfileSection = ({ companyInfo }) => {
+  if (!companyInfo) return null;
+  
   return (
     <section className="py-16 lg:py-24 bg-background">
       <div className="container mx-auto px-4">
@@ -212,7 +219,9 @@ const CollectionsSection = () => {
   );
 };
 
-const WhyChooseUsSection = () => {
+const WhyChooseUsSection = ({ companyInfo }) => {
+  if (!companyInfo || !companyInfo.whyChooseUs) return null;
+  
   const getIcon = (iconName) => {
     switch (iconName) {
       case "Palette": return <Palette className="h-8 w-8 text-primary" />;
@@ -258,13 +267,39 @@ const WhyChooseUsSection = () => {
 
 
 const HomePage = () => {
+  const { content, loading, error } = useHomepageContent();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Memuat konten...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-destructive mb-4">Terjadi kesalahan saat memuat konten</p>
+          <Button onClick={() => window.location.reload()}>Coba Lagi</Button>
+        </div>
+      </div>
+    );
+  }
+
+  const companyInfo = content?.companyInfo;
+
   return (
     <div className="bg-background">
-      <HeroSection />
-      <CompanyProfileSection />
+      <HeroSection companyInfo={companyInfo} />
+      <CompanyProfileSection companyInfo={companyInfo} />
       <FeaturedProductsSection />
       <CollectionsSection />
-      <WhyChooseUsSection />
+      <WhyChooseUsSection companyInfo={companyInfo} />
     </div>
   );
 };

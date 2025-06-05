@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Storage Debug Test</title>
+</head>
+<body>
+    <h1>Supabase Storage Debug</h1>
+    <div id="results"></div>
+    
+    <script type="module">
+        // Test Supabase storage connection
+        
+        const SUPABASE_URL = 'https://qojlgridoruusocgwsdw.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFvamxncmlkb3J1dXNvY2d3c2R3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkxMDM0MDIsImV4cCI6MjA2NDY3OTQwMn0._rn7_ItbtyMv1_BpIL10EcW7Br1xHhSAnYWClJtP0RE';
+        
+        const resultsDiv = document.getElementById('results');
+        
+        function log(message) {
+            console.log(message);
+            resultsDiv.innerHTML += '<p>' + message + '</p>';
+        }
+        
+        async function testStorageAccess() {
+            log('🚀 Testing Supabase Storage Access...');
+            
+            try {
+                // Create Supabase client manually
+                const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+                const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                
+                log('✅ Supabase client created');
+                
+                // Test 1: List buckets
+                log('\n📦 Testing bucket listing...');
+                const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+                
+                if (bucketsError) {
+                    log('❌ Bucket listing error: ' + bucketsError.message);
+                    log('Error details: ' + JSON.stringify(bucketsError, null, 2));
+                } else {
+                    log('✅ Buckets retrieved successfully: ' + buckets.length);
+                    buckets.forEach(bucket => {
+                        log(`  - ${bucket.name} (public: ${bucket.public})`);
+                    });
+                }
+                
+                // Test 2: Try to access each bucket individually
+                const requiredBuckets = ['images', 'documents', 'products', 'company'];
+                
+                for (const bucketName of requiredBuckets) {
+                    log(`\n🔍 Testing bucket: ${bucketName}`);
+                    try {
+                        const { data: files, error: filesError } = await supabase.storage
+                            .from(bucketName)
+                            .list('', { limit: 1 });
+                            
+                        if (filesError) {
+                            log(`❌ ${bucketName}: ${filesError.message}`);
+                        } else {
+                            log(`✅ ${bucketName}: Access OK (${files.length} items)`);
+                        }
+                    } catch (e) {
+                        log(`💥 ${bucketName}: ${e.message}`);
+                    }
+                }
+                
+            } catch (error) {
+                log('💥 Failed to test storage: ' + error.message);
+            }
+        }
+        
+        // Run the test
+        testStorageAccess();
+    </script>
+</body>
+</html>

@@ -1,9 +1,24 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { companyInfo } from '@/data/companyData'; 
+import { useCompanyInfo } from '@/hooks/useCompanyInfo';
+import { companyInfo as fallbackCompanyInfo } from '@/data/companyData'; 
 import { CheckCircle } from 'lucide-react';
 
 const AboutPage = () => {
+  const { data: companyData, loading, error } = useCompanyInfo();
+  const companyInfo = companyData || fallbackCompanyInfo;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Memuat informasi perusahaan...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-background font-lora">
       <section className=" py-20 md:py-32">

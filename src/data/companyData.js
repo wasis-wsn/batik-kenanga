@@ -4,9 +4,8 @@ export const companyInfo = {
   established: 1998,
   logoUrlLight: "/images/batik_kenanga_logo.png",
   heroImage: "/images/batik_background.jpg",
-  heroVideo: "/videos/video_batik_kenanga.mp4",
   homePageImage: "/images/home_page_batik.jpg",
-  profileImage: "https://images.unsplash.com/photo-1666578296079-52024f45d962",
+  profileImage: "/images/home_page_batik_canting.jpg",
   mission: "Melestarikan warisan adiluhung batik Nusantara seraya berinovasi untuk memenuhi kebutuhan identitas personal dan korporat masa kini.",
   vision: "Menjadi rujukan utama batik kustom berkualitas tinggi yang merepresentasikan keindahan dan keragaman budaya Indonesia di kancah global.",
   profileSingkat: "Bring Up Your Identity adalah filosofi Batik Kenanga yang mengajak setiap individu dan institusi mengekspresikan jati diri melalui batik. Melalui layanan kustomisasi warna dan motif, kami membantu Anda menciptakan batik yang merepresentasikan kepribadian, nilai, atau brand Anda. Kami percaya setiap orang berhak tampil dengan versi terbaik dirinya tanpa kehilangan akar budaya.",
@@ -56,14 +55,14 @@ export const companyInfo = {
       position: "Pendiri Pertama",
       period: "1999 - 2007",
       bio: "Pencetus visi Batik Kenanga yang meletakkan fondasi kuat untuk pelestarian dan inovasi batik tradisional. Warisan beliau dalam teknik dan filosofi batik tetap menjadi panduan utama kami hingga kini.",
-      imageUrl: "https://images.unsplash.com/photo-1580308782063-69551a8dc68c"
+      imageUrl: "/images/pendiri_batik_1.jpg"
     },
     {
       name: "Ibu Kenanga Sari",
       position: "Pendiri & Maestro Batik",
       period: "2007 - Sekarang",
       bio: "Melanjutkan warisan Ibu Ratna dengan memadukan tradisi dan inovasi. Dengan lebih dari 30 tahun pengalaman, Ibu Kenanga adalah jantung dan jiwa dari setiap desain yang lahir di era modern Batik Kenanga.",
-      imageUrl: "https://images.unsplash.com/photo-1580308782063-69551a8dc68c"
+      imageUrl: "/images/pendiri_batik_1.jpg"
     }
   ],
 };
