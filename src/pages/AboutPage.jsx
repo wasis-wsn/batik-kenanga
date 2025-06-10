@@ -5,8 +5,8 @@ import { companyInfo as fallbackCompanyInfo } from '@/data/companyData';
 import { CheckCircle } from 'lucide-react';
 
 const AboutPage = () => {
-  const { data: companyData, loading, error } = useCompanyInfo();
-  const companyInfo = companyData || fallbackCompanyInfo;
+  const { companyInfo, loading } = useCompanyInfo();
+  const finalCompanyInfo = companyInfo || fallbackCompanyInfo;
 
   if (loading) {
     return (
@@ -23,7 +23,7 @@ const AboutPage = () => {
     <div className="bg-background font-lora">
       <section className=" py-20 md:py-32">
         <img
-          src={companyInfo.heroImage}
+          src={finalCompanyInfo.heroImage}
           alt="Model mengenakan Batik Kenanga"
           className="absolute inset-0 w-full h-full object-cover opacity-30"
         />
@@ -43,7 +43,7 @@ const AboutPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            {companyInfo.tagline} - Menghidupkan Kembali Tradisi, Menciptakan Identitas.
+            {finalCompanyInfo.tagline} - Menghidupkan Kembali Tradisi, Menciptakan Identitas.
           </motion.p>
         </div>
       </section>
@@ -59,7 +59,7 @@ const AboutPage = () => {
             >
               <h2 className="text-3xl lg:text-4xl font-montserrat font-bold text-primary mb-6">Cerita Kami</h2>
               <p className="text-lg text-muted-foreground leading-relaxed">
-                Batik Kenanga adalah  perusahaan batik yang berdiri di Mojolaban, Sukoharjo, pada tahun {companyInfo.established}. Batik Kenanga memiliki tagline orisinalitas, loyalitas, kualitas. Batik kenanga merupakan batik dengan proses pembuatan tradisional dengan alat cap. Batik Kenanga ingin membawa image batik yang sebenarnya yaitu “Batik bukan hanya sekedar motif tetapi batik adalah  proses”. Dalam proses produksi Batik Kenanga menganut sistem kekeluargaan sehingga rata-rata pekerja yang bekerja merupakan pegawai yang sudah lama bekerja untuk Batik Kenanga. Sejak didirikan Batik Kenanga menyasar beberapa target pasar termasuk lokal dan internasional dalam skala besar. Untuk ekspor Batik Kenanga bekerjasama dengan PT. Aneka Sandang Interbuana, untuk lokal Batik Kenanga bekerjasama dengan Batik Danar Hadi sebagai supplier.
+                Batik Kenanga adalah  perusahaan batik yang berdiri di Mojolaban, Sukoharjo, pada tahun {finalCompanyInfo.established}. Batik Kenanga memiliki tagline orisinalitas, loyalitas, kualitas. Batik kenanga merupakan batik dengan proses pembuatan tradisional dengan alat cap. Batik Kenanga ingin membawa image batik yang sebenarnya yaitu “Batik bukan hanya sekedar motif tetapi batik adalah  proses”. Dalam proses produksi Batik Kenanga menganut sistem kekeluargaan sehingga rata-rata pekerja yang bekerja merupakan pegawai yang sudah lama bekerja untuk Batik Kenanga. Sejak didirikan Batik Kenanga menyasar beberapa target pasar termasuk lokal dan internasional dalam skala besar. Untuk ekspor Batik Kenanga bekerjasama dengan PT. Aneka Sandang Interbuana, untuk lokal Batik Kenanga bekerjasama dengan Batik Danar Hadi sebagai supplier.
               </p>
             </motion.div>
             <motion.div
@@ -70,7 +70,7 @@ const AboutPage = () => {
               className="relative"
             >
               <div className="rounded-lg overflow-hidden shadow-2xl aspect-[4/3]">
-                <img  alt="Pengrajin Batik Kenanga sedang bekerja" className="w-full h-full object-cover" src={companyInfo.homePageImage} />
+                <img  alt="Pengrajin Batik Kenanga sedang bekerja" className="w-full h-full object-cover" src={finalCompanyInfo.homePageImage} />
               </div>
                <div className="absolute -bottom-5 -left-5 bg-card p-4 rounded-lg shadow-xl max-w-sm border border-secondary">
                 <p className="font-playfair-display text-lg font-semibold text-primary">
@@ -95,7 +95,7 @@ const AboutPage = () => {
             >
               <h3 className="text-2xl lg:text-3xl font-montserrat font-bold text-primary mb-4 text-center">Misi Kami</h3>
               <p className="text-lg text-muted-foreground text-center leading-relaxed">
-                {companyInfo.mission}
+                {finalCompanyInfo.mission}
               </p>
             </motion.div>
             <motion.div
@@ -107,7 +107,7 @@ const AboutPage = () => {
             >
               <h3 className="text-2xl lg:text-3xl font-montserrat font-bold text-primary mb-4 text-center">Visi Kami</h3>
               <p className="text-lg text-muted-foreground text-center leading-relaxed">
-                {companyInfo.vision}
+                {finalCompanyInfo.vision}
               </p>
             </motion.div>
           </div>
@@ -122,10 +122,9 @@ const AboutPage = () => {
               Prinsip yang memandu setiap langkah dan karya Batik Kenanga.
             </p>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {companyInfo.values.map((value, index) => (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">            {finalCompanyInfo.values.map((value, index) => (
               <motion.div
-                key={index}
+                key={value.title}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -150,11 +149,9 @@ const AboutPage = () => {
             <p className="font-playfair-display text-xl text-muted-foreground max-w-2xl mx-auto">
               Figur-figur kunci yang membangun dan mengembangkan warisan Batik Kenanga.
             </p>
-          </div>
-          <div className="grid md:grid-cols-2 gap-10 max-w-4xl mx-auto">
-            {companyInfo.team.map((member, index) => (
+          </div>          <div className="grid md:grid-cols-2 gap-10 max-w-4xl mx-auto">            {finalCompanyInfo.team.map((member, index) => (
               <motion.div
-                key={index}
+                key={member.id || `team-member-${index}`}
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}

@@ -1,14 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react';
+import { useCompanyInfo } from '@/hooks/useCompanyInfo';
 import { companyInfo as fallbackCompanyInfo } from '@/data/companyData';
 
-const Footer = ({ companyInfo = fallbackCompanyInfo }) => {
+const Footer = () => {
+  const { companyInfo } = useCompanyInfo();
   const logoUrl = companyInfo?.logoUrlLight || fallbackCompanyInfo.logoUrlLight;
   const companyName = companyInfo?.name || fallbackCompanyInfo.name;
-  const companyDescription = companyInfo?.description || fallbackCompanyInfo.description;
+  const contactInfo = companyInfo?.contactInfo || fallbackCompanyInfo.contactInfo;
   const socialMedia = companyInfo?.socialMedia || fallbackCompanyInfo.socialMedia;
-  const contact = companyInfo?.contact || fallbackCompanyInfo.contact;
   
   return (
     <footer className="bg-secondary mt-16">
@@ -24,9 +25,8 @@ const Footer = ({ companyInfo = fallbackCompanyInfo }) => {
                   e.target.src = fallbackCompanyInfo.logoUrlLight;
                 }}
               />
-            </Link>
-            <p className="text-muted-foreground mb-4 font-lora">
-              {companyDescription}
+            </Link>            <p className="text-muted-foreground mb-4 font-lora">
+              {companyInfo?.profileSingkat || fallbackCompanyInfo.profileSingkat}
             </p>
             <div className="flex space-x-4">
               {socialMedia?.facebook && (
@@ -71,18 +71,17 @@ const Footer = ({ companyInfo = fallbackCompanyInfo }) => {
             </ul>
           </div>          <div>
             <h3 className="text-xl font-montserrat font-semibold mb-4 text-primary">Hubungi Kami</h3>
-            <ul className="space-y-4 font-lora">
-              <li className="flex items-start">
+            <ul className="space-y-4 font-lora">              <li className="flex items-start">
                 <MapPin className="h-5 w-5 mr-3 mt-1 text-primary flex-shrink-0" />
-                <span className="text-muted-foreground">{contact?.address}</span>
+                <span className="text-muted-foreground">{contactInfo?.address || "Jl. Kenanga Indah No. 1, Solo, Indonesia"}</span>
               </li>
               <li className="flex items-center">
                 <Phone className="h-5 w-5 mr-3 text-primary flex-shrink-0" />
-                <span className="text-muted-foreground">{contact?.phone}</span>
+                <span className="text-muted-foreground">{contactInfo?.phone || "+62 812 9876 5432"}</span>
               </li>
               <li className="flex items-center">
                 <Mail className="h-5 w-5 mr-3 text-primary flex-shrink-0" />
-                <span className="text-muted-foreground">{contact?.email}</span>
+                <span className="text-muted-foreground">{contactInfo?.email || "info@batikenanga.com"}</span>
               </li>
             </ul>
           </div>

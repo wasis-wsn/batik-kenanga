@@ -148,7 +148,146 @@ export const companyInfoService = {  async getCompanyInfo() {
       throw error;
     }
   },
+  // Upload home page image (replaces existing home page image)
+  async uploadHomePageImage(file) {
+    try {
+      // First, get current home page image URL to delete old file
+      const { data: currentData } = await supabaseAdmin
+        .from('company_info')
+        .select('home_page_image')
+        .limit(1);
+      
+      // Delete old home page image if it exists and is stored in our bucket
+      if (currentData && currentData.length > 0 && currentData[0].home_page_image) {
+        const oldUrl = currentData[0].home_page_image;
+        if (oldUrl.includes('/storage/v1/object/public/company/home-page-images/')) {
+          // Extract file path from URL
+          const urlParts = oldUrl.split('/storage/v1/object/public/company/');
+          if (urlParts.length > 1) {
+            const filePath = urlParts[1];
+            try {
+              await storageService.deleteFile(STORAGE_BUCKETS.COMPANY, filePath);
+              console.log('Old home page image deleted:', filePath);
+            } catch (deleteError) {
+              console.warn('Could not delete old home page image:', deleteError);
+              // Continue with upload even if delete fails
+            }
+          }
+        }
+      }
+      
+      // Upload new home page image
+      const uploadResult = await storageService.uploadFile(
+        STORAGE_BUCKETS.COMPANY, 
+        file, 
+        `home-page-images/${Date.now()}-${file.name}`
+      );
+      
+      console.log('New home page image uploaded:', uploadResult.publicUrl);
+      return uploadResult.publicUrl;
+    } catch (error) {
+      console.error('Error uploading home page image:', error);
+      throw error;
+    }
+  },
+  // Upload profile image (replaces existing profile image)
+  async uploadProfileImage(file) {
+    try {
+      // First, get current profile image URL to delete old file
+      const { data: currentData } = await supabaseAdmin
+        .from('company_info')
+        .select('profile_image')
+        .limit(1);
+      
+      // Delete old profile image if it exists and is stored in our bucket
+      if (currentData && currentData.length > 0 && currentData[0].profile_image) {
+        const oldUrl = currentData[0].profile_image;
+        if (oldUrl.includes('/storage/v1/object/public/company/profile-images/')) {
+          // Extract file path from URL
+          const urlParts = oldUrl.split('/storage/v1/object/public/company/');
+          if (urlParts.length > 1) {
+            const filePath = urlParts[1];
+            try {
+              await storageService.deleteFile(STORAGE_BUCKETS.COMPANY, filePath);
+              console.log('Old profile image deleted:', filePath);
+            } catch (deleteError) {
+              console.warn('Could not delete old profile image:', deleteError);
+              // Continue with upload even if delete fails
+            }
+          }
+        }
+      }
+      
+      // Upload new profile image
+      const uploadResult = await storageService.uploadFile(
+        STORAGE_BUCKETS.COMPANY, 
+        file, 
+        `profile-images/${Date.now()}-${file.name}`
+      );
+      
+      console.log('New profile image uploaded:', uploadResult.publicUrl);
+      return uploadResult.publicUrl;
+    } catch (error) {
+      console.error('Error uploading profile image:', error);
+      throw error;
+    }
+  },
   // Note: Hero videos are now served statically from public/videos/
+  // Upload team member image with organized folder structure
+  async uploadTeamMemberImage(file, memberIndex, existingImageUrl = null) {
+    try {      // Delete existing image if exists
+      if (existingImageUrl?.includes('/storage/v1/object/public/company/team/')) {
+        const urlParts = existingImageUrl.split('/storage/v1/object/public/company/');
+        if (urlParts.length > 1) {
+          const filePath = urlParts[1];
+          try {
+            await storageService.deleteFile(STORAGE_BUCKETS.COMPANY, filePath);
+            console.log('Old team member image deleted:', filePath);
+          } catch (deleteError) {
+            console.warn('Could not delete old team member image:', deleteError);
+            // Continue with upload even if delete fails
+          }
+        }
+      }
+      
+      // Create organized folder structure: team/{memberIndex}/foto.jpg
+      const fileExtension = file.name.split('.').pop();
+      const fileName = `foto.${fileExtension}`;
+      const folderPath = `team/${memberIndex}/${fileName}`;
+      
+      // Upload new team member image
+      const uploadResult = await storageService.uploadFile(
+        STORAGE_BUCKETS.COMPANY, 
+        file, 
+        folderPath
+      );
+      
+      console.log('New team member image uploaded:', uploadResult.publicUrl);
+      return uploadResult.publicUrl;
+    } catch (error) {
+      console.error('Error uploading team member image:', error);
+      throw error;
+    }
+  },
+
+  // Delete team member folder and all its contents
+  async deleteTeamMemberImages(memberIndex) {
+    try {
+      // List all files in the member's folder
+      const files = await storageService.listFiles(STORAGE_BUCKETS.COMPANY, `team/${memberIndex}`);
+      
+      // Delete all files in the folder
+      for (const file of files) {
+        await storageService.deleteFile(STORAGE_BUCKETS.COMPANY, file.fullPath);
+      }
+      
+      console.log(`Team member ${memberIndex} folder cleaned up`);
+      return true;
+    } catch (error) {
+      console.error('Error deleting team member images:', error);
+      throw error;
+    }
+  },
 
   // Upload company images
   async uploadCompanyImage(file, category = 'general') {
@@ -311,22 +450,53 @@ export const settingsService = {
       console.error('Error updating setting:', error);
       throw error;
     }
-  },
-
-  async updateMultipleSettings(settings) {
+  },  async updateMultipleSettings(settings) {
     try {
-      const settingsArray = Object.entries(settings).map(([key, value]) => ({
-        key,
-        value: typeof value === 'object' ? JSON.stringify(value) : value
-      }));
-
-      const { data, error } = await supabase
-        .from('settings')
-        .upsert(settingsArray)
-        .select();
+      console.log('Starting updateMultipleSettings with:', settings);
       
-      if (error) throw error;
-      return data;
+      // Process each setting individually to avoid conflicts
+      const results = [];
+      
+      for (const [key, value] of Object.entries(settings)) {
+        try {
+          const processedValue = typeof value === 'object' ? JSON.stringify(value) : String(value);
+          
+          // First try to update existing record
+          const { data: updateData, error: updateError } = await supabase
+            .from('settings')
+            .update({ value: processedValue })
+            .eq('key', key)
+            .select();
+          
+          if (updateError) {
+            console.error(`Update error for key ${key}:`, updateError);
+            throw updateError;
+          }
+          
+          // If no rows were updated, insert new record
+          if (!updateData || updateData.length === 0) {
+            const { data: insertData, error: insertError } = await supabase
+              .from('settings')
+              .insert([{ key, value: processedValue }])
+              .select();
+            
+            if (insertError) {
+              console.error(`Insert error for key ${key}:`, insertError);
+              throw insertError;
+            }
+            
+            results.push(...(insertData || []));
+          } else {
+            results.push(...updateData);
+          }
+        } catch (err) {
+          console.error(`Error processing setting ${key}:`, err);
+          throw err;
+        }
+      }
+      
+      console.log('All settings processed successfully:', results);
+      return results;
     } catch (error) {
       console.error('Error updating multiple settings:', error);
       throw error;

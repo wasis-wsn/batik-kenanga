@@ -62,8 +62,63 @@ export const useCompanyInfo = () => {
       throw err;
     }
   };
-  // Hero videos are now served statically from public/videos/
-  // Remove video upload functionality as per requirements
+
+  const uploadHomePageImage = async (file) => {
+    try {
+      const imageUrl = await companyService.uploadHomePageImage(file);
+      setCompanyInfo(prev => ({ ...prev, homePageImage: imageUrl }));
+      return imageUrl;
+    } catch (err) {
+      console.error('Error uploading home page image:', err);
+      setError(err);
+      throw err;
+    }
+  };
+
+  const uploadProfileImage = async (file) => {
+    try {
+      const imageUrl = await companyService.uploadProfileImage(file);
+      setCompanyInfo(prev => ({ ...prev, profileImage: imageUrl }));
+      return imageUrl;
+    } catch (err) {
+      console.error('Error uploading profile image:', err);
+      setError(err);
+      throw err;
+    }
+  };
+  const uploadTeamMemberImage = async (file, memberIndex, existingImageUrl = null) => {
+    try {
+      const imageUrl = await companyService.uploadTeamMemberImage(file, memberIndex, existingImageUrl);
+      return imageUrl;
+    } catch (err) {
+      console.error('Error uploading team member image:', err);
+      setError(err);
+      throw err;
+    }
+  };
+
+  const deleteTeamMemberImages = async (memberIndex) => {
+    try {
+      await companyService.deleteTeamMemberImages(memberIndex);
+      return true;
+    } catch (err) {
+      console.error('Error deleting team member images:', err);
+      setError(err);
+      throw err;
+    }
+  };
+
+  const updateTeamData = async (teamData) => {
+    try {
+      const result = await companyService.updateTeamData(teamData);
+      setCompanyInfo(prev => ({ ...prev, team: teamData }));
+      return result;
+    } catch (err) {
+      console.error('Error updating team data:', err);
+      setError(err);
+      throw err;
+    }
+  };
 
   const refresh = () => {
     companyService.clearCache();
@@ -76,53 +131,10 @@ export const useCompanyInfo = () => {
     updateCompanyInfo,
     uploadLogo,
     uploadHeroImage,
-    refresh
-  };
-};
-
-export const useHomepageContent = () => {
-  const [content, setContent] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    fetchHomepageContent();
-  }, []);
-
-  const fetchHomepageContent = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await companyService.getHomepageContent();
-      setContent(data);
-    } catch (err) {
-      console.error('Error fetching homepage content:', err);
-      setError(err);
-      // Fallback to static data
-      const staticData = companyService.getStaticCompanyInfo();
-      setContent({
-        companyInfo: staticData,
-        heroSettings: {
-          showVideo: true,
-          showCTA: true,
-          backgroundOpacity: 0.5
-        },
-        featuredProducts: []
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const refresh = () => {
-    companyService.clearCache();
-    fetchHomepageContent();
-  };
-
-  return {
-    content,
-    loading,
-    error,
+    uploadHomePageImage,
+    uploadProfileImage,    uploadTeamMemberImage,
+    deleteTeamMemberImages,
+    updateTeamData,
     refresh
   };
 };

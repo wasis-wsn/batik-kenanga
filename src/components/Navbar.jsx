@@ -5,13 +5,15 @@ import { Menu, X, ShoppingBag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
+import { useCompanyInfo } from '@/hooks/useCompanyInfo';
 import { companyInfo as fallbackCompanyInfo } from '@/data/companyData';
 
-const Navbar = ({ companyInfo = fallbackCompanyInfo }) => {
+const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   const { cartItems } = useCart();
+  const { companyInfo } = useCompanyInfo();
 
   const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
   const logoUrl = companyInfo?.logoUrlLight || fallbackCompanyInfo.logoUrlLight;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Building, Phone, Mail, MapPin, Globe, Image, Video } from 'lucide-react';
+import { Save, Building, Phone, Globe, Image, Users, Plus, Edit, Trash2, X } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
@@ -8,11 +8,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/ca
 import { useToast } from '../../components/ui/use-toast';
 import { useCompanyInfo } from '../../hooks/useCompanyInfo';
 
-const CompanyInfoPage = () => {
-  const { toast } = useToast();
-  const { companyInfo, loading, error, updateCompanyInfo, uploadLogo, uploadHeroImage, refresh } = useCompanyInfo();
+const CompanyInfoPage = () => {  const { toast } = useToast();
+  const { companyInfo, loading, updateCompanyInfo, uploadLogo, uploadHeroImage, uploadHomePageImage, uploadProfileImage, uploadTeamMemberImage, deleteTeamMemberImages, updateTeamData } = useCompanyInfo();
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState({});
+  const [teamData, setTeamData] = useState([]);
+  const [teamUploading, setTeamUploading] = useState({});
+  const [editingTeamMember, setEditingTeamMember] = useState(null);
+  const [teamFormData, setTeamFormData] = useState({
+    name: '',
+    position: '',
+    period: '',
+    bio: '',
+    imageUrl: ''
+  });
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -65,6 +74,9 @@ const CompanyInfoPage = () => {
         founded_year: companyInfo.foundedYear || companyInfo.established || '',
         team_size: companyInfo.teamSize || '',
       });
+      
+      // Initialize team data
+      setTeamData(companyInfo.team || []);
     }
   }, [companyInfo]);
 
@@ -77,17 +89,21 @@ const CompanyInfoPage = () => {
   };
 
   const handleFileUpload = async (file, uploadType) => {
-    if (!file) return;
-
-    try {
+    if (!file) return;    try {
       setUploading(prev => ({ ...prev, [uploadType]: true }));
 
-      let result;      switch (uploadType) {
+      switch (uploadType) {
         case 'logo':
-          result = await uploadLogo(file);
+          await uploadLogo(file);
           break;
         case 'heroImage':
-          result = await uploadHeroImage(file);
+          await uploadHeroImage(file);
+          break;
+        case 'homePageImage':
+          await uploadHomePageImage(file);
+          break;
+        case 'profileImage':
+          await uploadProfileImage(file);
           break;
         default:
           throw new Error('Invalid upload type');
@@ -151,8 +167,8 @@ const CompanyInfoPage = () => {
           facebook: formData.facebook,
           twitter: formData.twitter,
           linkedin: formData.linkedin,
-          youtube: formData.youtube,
-        },
+          youtube: formData.youtube,        },
+        team: cleanTeamData(teamData),
       };
 
       await updateCompanyInfo(updateData);
@@ -169,6 +185,253 @@ const CompanyInfoPage = () => {
       });
     } finally {
       setSaving(false);
+    }
+  };
+
+  // Team Management Functions
+  const handleTeamFormChange = (e) => {
+    const { name, value } = e.target;
+    setTeamFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+  const handleTeamImageUpload = async (file, memberIndex = null) => {
+    try {
+      if (memberIndex !== null) {
+        setTeamUploading(prev => ({ ...prev, [memberIndex]: true }));
+      } else {
+        setTeamUploading(prev => ({ ...prev, new: true }));
+      }
+
+      let targetIndex;
+      let existingImageUrl = null;
+
+      if (memberIndex !== null) {
+        // For existing member, use their current index
+        targetIndex = memberIndex;
+        existingImageUrl = teamData[memberIndex]?.imageUrl;
+      } else {
+        // For new member, use next available index
+        targetIndex = teamData.length;
+      }
+
+      const imageUrl = await uploadTeamMemberImage(file, targetIndex, existingImageUrl);
+      
+      if (memberIndex !== null) {
+        // Update existing member
+        const updatedTeam = [...teamData];
+        updatedTeam[memberIndex].imageUrl = imageUrl;
+        setTeamData(updatedTeam);
+      } else {
+        // Update form for new member
+        setTeamFormData(prev => ({ ...prev, imageUrl }));
+      }
+
+      toast({
+        title: "Success",
+        description: "Team member image uploaded successfully",
+      });
+    } catch (error) {
+      console.error('Error uploading team image:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload team image",
+        variant: "destructive",
+      });
+    } finally {
+      if (memberIndex !== null) {
+        setTeamUploading(prev => ({ ...prev, [memberIndex]: false }));
+      } else {
+        setTeamUploading(prev => ({ ...prev, new: false }));
+      }
+    }
+  };
+
+  const addTeamMember = () => {
+    if (!teamFormData.name.trim() || !teamFormData.position.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Name and position are required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newMember = {
+      id: Date.now(), // Simple ID for editing
+      name: teamFormData.name,
+      position: teamFormData.position,
+      period: teamFormData.period,
+      bio: teamFormData.bio,
+      imageUrl: teamFormData.imageUrl
+    };
+
+    const updatedTeam = [...teamData, newMember];
+    setTeamData(updatedTeam);
+    setTeamFormData({
+      name: '',
+      position: '',
+      period: '',
+      bio: '',
+      imageUrl: ''
+    });
+
+    toast({
+      title: "Success",
+      description: "Team member added successfully",
+    });
+  };
+
+  const editTeamMember = (index) => {
+    const member = teamData[index];
+    setEditingTeamMember(index);
+    setTeamFormData({
+      name: member.name,
+      position: member.position,
+      period: member.period || '',
+      bio: member.bio || '',
+      imageUrl: member.imageUrl || ''
+    });
+  };
+
+  const updateTeamMember = () => {
+    if (!teamFormData.name.trim() || !teamFormData.position.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Name and position are required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const updatedTeam = [...teamData];
+    updatedTeam[editingTeamMember] = {
+      ...updatedTeam[editingTeamMember],
+      name: teamFormData.name,
+      position: teamFormData.position,
+      period: teamFormData.period,
+      bio: teamFormData.bio,
+      imageUrl: teamFormData.imageUrl
+    };
+
+    setTeamData(updatedTeam);
+    setEditingTeamMember(null);
+    setTeamFormData({
+      name: '',
+      position: '',
+      period: '',
+      bio: '',
+      imageUrl: ''
+    });
+
+    toast({
+      title: "Success",
+      description: "Team member updated successfully",
+    });
+  };  const deleteTeamMember = async (index) => {
+    try {
+      // Delete member's folder and images from storage
+      await deleteTeamMemberImages(index);
+      
+      // Remove from local state
+      const updatedTeam = teamData.filter((_, i) => i !== index);
+      setTeamData(updatedTeam);
+      
+      toast({
+        title: "Success",
+        description: "Team member deleted successfully. Please save to apply changes.",
+      });
+    } catch (error) {
+      console.error('Error deleting team member:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete team member images",
+        variant: "destructive",
+      });
+      
+      // Still remove from UI even if image deletion fails
+      const updatedTeam = teamData.filter((_, i) => i !== index);
+      setTeamData(updatedTeam);
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditingTeamMember(null);
+    setTeamFormData({
+      name: '',
+      position: '',
+      period: '',
+      bio: '',
+      imageUrl: ''
+    });  };
+
+  const cleanTeamData = (data) => {
+    return data.map(member => ({
+      name: member.name.trim(),
+      position: member.position.trim(),
+      period: member.period ? member.period.trim() : '',
+      bio: member.bio ? member.bio.trim() : '',
+      imageUrl: member.imageUrl || ''
+    }));
+  };
+  const saveTeamData = async () => {
+    try {
+      // First, reorganize team data with sequential indices and update image URLs
+      const reorganizedTeam = await Promise.all(
+        teamData.map(async (member, newIndex) => {
+          let updatedMember = { ...member };
+          
+          // If member has an image and it's stored in our bucket
+          if (member.imageUrl?.includes('/storage/v1/object/public/company/team/')) {
+            const urlParts = member.imageUrl.split('/team/');
+            if (urlParts.length > 1) {
+              const currentIndex = parseInt(urlParts[1].split('/')[0]);
+              
+              // If current index doesn't match the new sequential index, move the image
+              if (currentIndex !== newIndex) {
+                try {
+                  // Fetch the current image
+                  const response = await fetch(member.imageUrl);
+                  const blob = await response.blob();
+                  const fileName = member.imageUrl.split('/').pop();
+                  const file = new File([blob], fileName, { type: blob.type });
+                  
+                  // Upload to new sequential location
+                  const newImageUrl = await uploadTeamMemberImage(file, newIndex, member.imageUrl);
+                  updatedMember.imageUrl = newImageUrl;
+                  
+                  console.log(`Moved team member ${member.name} image from index ${currentIndex} to ${newIndex}`);
+                } catch (error) {
+                  console.warn('Failed to reorganize image for member:', member.name, error);
+                  // Keep original URL if reorganization fails
+                }
+              }
+            }
+          }
+          
+          return updatedMember;
+        })
+      );
+      
+      // Clean and save the reorganized team data
+      const cleanedTeamData = cleanTeamData(reorganizedTeam);
+      await updateTeamData(cleanedTeamData);
+      
+      // Update local state with reorganized data
+      setTeamData(reorganizedTeam);
+      
+      toast({
+        title: "Success",
+        description: "Team data saved successfully with organized folder structure",
+      });
+    } catch (error) {
+      console.error('Error saving team data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save team data",
+        variant: "destructive",
+      });
     }
   };
 
@@ -438,12 +701,281 @@ const CompanyInfoPage = () => {
                   )}
                 </div>
               </div>
+
+              {/* Home Page Image */}
+              <div className="space-y-3">
+                <Label>Home Page Image</Label>
+                {companyInfo?.homePageImage && (
+                  <div className="relative w-32 h-20 border rounded-lg overflow-hidden bg-gray-50">
+                    <img 
+                      src={companyInfo.homePageImage} 
+                      alt="Home Page Image"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFileUpload(file, 'homePageImage');
+                    }}
+                    disabled={uploading.homePageImage}
+                    className="text-sm"
+                  />
+                  {uploading.homePageImage && (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                  )}
+                </div>
+              </div>
+
+              {/* Profile Image */}
+              <div className="space-y-3">
+                <Label>Profile Image</Label>
+                {companyInfo?.profileImage && (
+                  <div className="relative w-32 h-20 border rounded-lg overflow-hidden bg-gray-50">
+                    <img 
+                      src={companyInfo.profileImage} 
+                      alt="Profile Image"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFileUpload(file, 'profileImage');
+                    }}
+                    disabled={uploading.profileImage}
+                    className="text-sm"
+                  />
+                  {uploading.profileImage && (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className="text-sm text-gray-600">
               <p>• Logo: Recommended size 200x200px, PNG format with transparent background</p>
               <p>• Hero Image: Recommended size 1920x1080px for best results</p>
+              <p>• Home Page Image: Recommended size 1200x800px, used on home page sections</p>
+              <p>• Profile Image: Recommended size 800x600px, used in about/profile sections</p>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Team Management */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Team Management
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Current Team Members */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Current Team Members</h3>
+              <div className="grid gap-4">
+                {teamData.map((member, index) => (
+                  <div key={member.id || index} className="border rounded-lg p-4 flex items-start gap-4">
+                    {/* Member Image */}
+                    <div className="flex-shrink-0">
+                      {member.imageUrl ? (
+                        <img 
+                          src={member.imageUrl} 
+                          alt={member.name}
+                          className="w-16 h-16 rounded-lg object-cover"
+                        />
+                      ) : (
+                        <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                          <Users className="h-6 w-6 text-gray-400" />
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Member Info */}
+                    <div className="flex-grow">
+                      <h4 className="font-semibold text-lg">{member.name}</h4>
+                      <p className="text-blue-600 font-medium">{member.position}</p>
+                      {member.period && (
+                        <p className="text-sm text-gray-500">{member.period}</p>
+                      )}
+                      {member.bio && (
+                        <p className="text-sm text-gray-600 mt-2 line-clamp-2">{member.bio}</p>
+                      )}
+                    </div>
+                    
+                    {/* Actions */}
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => editTeamMember(index)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => deleteTeamMember(index)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+                
+                {teamData.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    No team members added yet. Add your first team member below.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Add/Edit Team Member Form */}
+            <div className="border-t pt-6">
+              <h3 className="text-lg font-semibold mb-4">
+                {editingTeamMember !== null ? 'Edit Team Member' : 'Add New Team Member'}
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="teamName">Name *</Label>
+                  <Input
+                    id="teamName"
+                    name="name"
+                    value={teamFormData.name}
+                    onChange={handleTeamFormChange}
+                    placeholder="Enter member name"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="teamPosition">Position *</Label>
+                  <Input
+                    id="teamPosition"
+                    name="position"
+                    value={teamFormData.position}
+                    onChange={handleTeamFormChange}
+                    placeholder="Enter position/role"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="teamPeriod">Period</Label>
+                  <Input
+                    id="teamPeriod"
+                    name="period"
+                    value={teamFormData.period}
+                    onChange={handleTeamFormChange}
+                    placeholder="e.g., 2020 - Present"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="teamImage">Profile Image</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id="teamImage"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleTeamImageUpload(file);
+                      }}
+                      disabled={teamUploading.new}
+                      className="text-sm"
+                    />
+                    {teamUploading.new && (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-4 space-y-2">
+                <Label htmlFor="teamBio">Biography</Label>
+                <Textarea
+                  id="teamBio"
+                  name="bio"
+                  value={teamFormData.bio}
+                  onChange={handleTeamFormChange}
+                  placeholder="Enter member biography..."
+                  rows={3}
+                />
+              </div>
+              
+              {/* Current Image Preview */}
+              {teamFormData.imageUrl && (
+                <div className="mt-4">
+                  <Label>Current Image</Label>
+                  <div className="relative w-32 h-32 mt-2">
+                    <img 
+                      src={teamFormData.imageUrl} 
+                      alt="Team member preview"
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                  </div>
+                </div>
+              )}
+              
+              {/* Form Actions */}
+              <div className="flex gap-2 mt-6">
+                {editingTeamMember !== null ? (
+                  <>
+                    <Button
+                      type="button"
+                      onClick={updateTeamMember}
+                      disabled={teamUploading.new}
+                    >
+                      Update Member
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={cancelEdit}
+                    >
+                      <X className="h-4 w-4 mr-2" />
+                      Cancel
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    type="button"
+                    onClick={addTeamMember}
+                    disabled={teamUploading.new}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Member
+                  </Button>
+                )}
+              </div>
+            </div>
+            
+            {/* Save Team Changes */}
+            {teamData.length > 0 && (
+              <div className="border-t pt-6">
+                <Button
+                  type="button"
+                  onClick={saveTeamData}
+                  className="w-full"
+                >
+                  Save Team Data to Database
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
 

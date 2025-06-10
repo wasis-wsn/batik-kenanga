@@ -65,4 +65,17 @@ export const companyInfo = {
       imageUrl: "/images/pendiri_batik_1.jpg"
     }
   ],
+  contactInfo: {
+    address: "Jl. Kenanga Indah No. 1, Solo, Indonesia",
+    phone: "+62 812 9876 5432",
+    email: "info@batikenanga.com",
+    website: "https://batikenanga.com",
+    whatsapp: "+62 812 9876 5432"
+  },
+  socialMedia: {
+    facebook: "https://facebook.com/batikenanga",
+    instagram: "https://instagram.com/batikenanga",
+    twitter: "https://twitter.com/batikenanga",
+    youtube: "https://youtube.com/@batikenanga"
+  }
 };

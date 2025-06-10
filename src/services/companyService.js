@@ -30,13 +30,26 @@ class CompanyService {
           tagline: supabaseData.tagline || staticCompanyInfo.tagline,
           logoUrlLight: supabaseData.logo_url_light || staticCompanyInfo.logoUrlLight,
           heroImage: supabaseData.hero_image || staticCompanyInfo.heroImage,
+          homePageImage: supabaseData.home_page_image || staticCompanyInfo.homePageImage,
+          profileImage: supabaseData.profile_image || staticCompanyInfo.profileImage,
           heroVideo: supabaseData.hero_video || staticCompanyInfo.heroVideo,
           mission: supabaseData.mission || staticCompanyInfo.mission,
           vision: supabaseData.vision || staticCompanyInfo.vision,
           profileSingkat: supabaseData.profile_singkat || staticCompanyInfo.profileSingkat,
           established: supabaseData.established || staticCompanyInfo.established,
-          contactInfo: supabaseData.contact_info || {},
-          socialMedia: supabaseData.social_media || {},
+          // Map contact and social media with proper fallbacks
+          contactInfo: {
+            ...staticCompanyInfo.contactInfo,
+            ...(supabaseData.contact_info || {})
+          },
+          socialMedia: {
+            ...staticCompanyInfo.socialMedia,
+            ...(supabaseData.social_media || {})
+          },
+          // Ensure we keep static data for arrays that might not be in DB
+          values: supabaseData.values || staticCompanyInfo.values,
+          whyChooseUs: supabaseData.why_choose_us || staticCompanyInfo.whyChooseUs,
+          team: supabaseData.team || staticCompanyInfo.team,
         };
 
         this.cache.set(cacheKey, {
@@ -146,8 +159,72 @@ class CompanyService {
       throw error;
     }
   }
-  // Hero videos are now served statically from public/videos/
-  // Remove video upload functionality as per requirements
+
+  // Upload home page image
+  async uploadHomePageImage(file) {
+    try {
+      const imageUrl = await companyInfoService.uploadHomePageImage(file);
+      
+      // Update company info with new home page image URL
+      await this.updateCompanyInfo({ home_page_image: imageUrl });
+      
+      return imageUrl;
+    } catch (error) {
+      console.error('Error uploading home page image:', error);
+      throw error;
+    }
+  }
+
+  // Upload profile image
+  async uploadProfileImage(file) {
+    try {
+      const imageUrl = await companyInfoService.uploadProfileImage(file);
+      
+      // Update company info with new profile image URL
+      await this.updateCompanyInfo({ profile_image: imageUrl });
+      
+      return imageUrl;
+    } catch (error) {
+      console.error('Error uploading profile image:', error);
+      throw error;
+    }
+  }
+  // Upload team member image with organized folder structure
+  async uploadTeamMemberImage(file, memberIndex, existingImageUrl = null) {
+    try {
+      const imageUrl = await companyInfoService.uploadTeamMemberImage(file, memberIndex, existingImageUrl);
+      return imageUrl;
+    } catch (error) {
+      console.error('Error uploading team member image:', error);
+      throw error;
+    }
+  }
+
+  // Delete team member images
+  async deleteTeamMemberImages(memberIndex) {
+    try {
+      await companyInfoService.deleteTeamMemberImages(memberIndex);
+      return true;
+    } catch (error) {
+      console.error('Error deleting team member images:', error);
+      throw error;
+    }
+  }
+
+  // Update team data
+  async updateTeamData(teamData) {
+    try {
+      const result = await this.updateCompanyInfo({ team: teamData });
+      
+      // Clear cache to force refresh
+      this.cache.delete('company_info');
+      
+      return result;
+    } catch (error) {
+      console.error('Error updating team data:', error);
+      throw error;
+    }
+  }
 
   // Clear cache
   clearCache() {

@@ -6,26 +6,24 @@ import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/ProductCard';
 import { products as allProducts } from '@/data/productData';
 import { categories as allCategories } from '@/data/categoryData';
-import { useHomepageContent } from '@/hooks/useCompanyInfo';
-const heroVideo = "/videos/video_batik_kenanga.mp4";
+import { useCompanyInfo } from '@/hooks/useCompanyInfo';
 
-const HeroSection = ({ companyInfo }) => {
-  if (!companyInfo) return null;
+const HeroSection = () => {
+  const { companyInfo } = useCompanyInfo();
   
-  return (
+  if (!companyInfo) return null;
+    return (
     <section className="relative min-h-[70vh] md:min-h-screen flex items-center justify-center text-center overflow-hidden bg-secondary">
         <video
           autoPlay
           loop
           muted
           playsInline
-          src={heroVideo}
+          src="/videos/video_batik_kenanga.mp4"
           className="absolute inset-0 w-full h-full object-cover opacity-50"
         />
-      )
       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent"></div>
-      <div className="relative z-10 container mx-auto px-4 py-20 md:py-32">
-        <motion.h1
+      <div className="relative z-10 container mx-auto px-4 py-20 md:py-32">        <motion.h1
           className="text-4xl md:text-6xl lg:text-7xl font-montserrat font-bold leading-tight text-primary mb-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -59,7 +57,9 @@ const HeroSection = ({ companyInfo }) => {
   );
 };
 
-const CompanyProfileSection = ({ companyInfo }) => {
+const CompanyProfileSection = () => {
+  const { companyInfo } = useCompanyInfo();
+  
   if (!companyInfo) return null;
   
   return (
@@ -219,8 +219,10 @@ const CollectionsSection = () => {
   );
 };
 
-const WhyChooseUsSection = ({ companyInfo }) => {
-  if (!companyInfo || !companyInfo.whyChooseUs) return null;
+const WhyChooseUsSection = () => {
+  const { companyInfo } = useCompanyInfo();
+  
+  if (!companyInfo?.whyChooseUs) return null;
   
   const getIcon = (iconName) => {
     switch (iconName) {
@@ -245,7 +247,7 @@ const WhyChooseUsSection = ({ companyInfo }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {companyInfo.whyChooseUs.map((item, index) => (
             <motion.div
-              key={index}
+              key={item.title}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -267,39 +269,13 @@ const WhyChooseUsSection = ({ companyInfo }) => {
 
 
 const HomePage = () => {
-  const { content, loading, error } = useHomepageContent();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Memuat konten...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-destructive mb-4">Terjadi kesalahan saat memuat konten</p>
-          <Button onClick={() => window.location.reload()}>Coba Lagi</Button>
-        </div>
-      </div>
-    );
-  }
-
-  const companyInfo = content?.companyInfo;
-
   return (
     <div className="bg-background">
-      <HeroSection companyInfo={companyInfo} />
-      <CompanyProfileSection companyInfo={companyInfo} />
+      <HeroSection />
+      <CompanyProfileSection />
       <FeaturedProductsSection />
       <CollectionsSection />
-      <WhyChooseUsSection companyInfo={companyInfo} />
+      <WhyChooseUsSection />
     </div>
   );
 };

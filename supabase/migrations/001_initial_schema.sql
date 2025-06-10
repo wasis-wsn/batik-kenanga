@@ -98,6 +98,7 @@ create table public.company_info (
   profile_singkat text,
   values jsonb default '[]',
   why_choose_us jsonb default '[]',
+  team jsonb default '[]',
   contact_info jsonb default '{}',
   social_media jsonb default '{}',
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,

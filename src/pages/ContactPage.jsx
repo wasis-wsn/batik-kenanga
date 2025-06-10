@@ -6,9 +6,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
+import { useCompanyInfo } from '@/hooks/useCompanyInfo';
+import { useSettings } from '@/hooks/useSettings';
+import { useEmailService } from '@/services/emailService';
+import { companyInfo as fallbackCompanyInfo } from '@/data/companyData';
 
 const ContactPage = () => {
   const { toast } = useToast();
+  const { companyInfo } = useCompanyInfo();
+  const { getSetting } = useSettings();
+  const { sendContactEmail } = useEmailService();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -17,34 +24,77 @@ const ContactPage = () => {
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // Get dynamic data with fallbacks
+  const finalCompanyInfo = companyInfo || fallbackCompanyInfo;
+  const contactInfo = finalCompanyInfo.contactInfo || fallbackCompanyInfo.contactInfo;  const businessHours = getSetting('business_hours', 'Senin-Jumat: 08:00-17:00, Sabtu: 08:00-15:00');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulate form submission
-    setTimeout(() => {
+    try {
+      // Validate form data
+      if (!formData.name.trim() || !formData.email.trim() || !formData.subject.trim() || !formData.message.trim()) {
+        toast({
+          title: "Form tidak lengkap",
+          description: "Mohon lengkapi semua field yang wajib diisi.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        toast({
+          title: "Email tidak valid",
+          description: "Mohon masukkan alamat email yang valid.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Send email using email service
+      const result = await sendContactEmail(formData);
+      
+      if (result.success) {
+        toast({
+          title: "Pesan terkirim!",
+          description: "Terima kasih telah menghubungi kami. Kami akan segera merespons pesan Anda dalam 1x24 jam.",
+          duration: 5000,
+        });
+        
+        // Reset form
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          subject: '',
+          message: ''
+        });
+      } else {
+        // Handle email send failure
+        console.error('Email send failed:', result.error);
+        toast({
+          title: "Gagal mengirim pesan",
+          description: result.message || "Terjadi kesalahan saat mengirim pesan. Silakan coba lagi atau hubungi kami langsung.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Contact form error:', error);
       toast({
-        title: "Pesan terkirim!",
-        description: "Terima kasih telah menghubungi kami. Kami akan segera merespons pesan Anda.",
-        duration: 5000,
+        title: "Terjadi kesalahan",
+        description: "Silakan coba lagi atau hubungi kami langsung melalui WhatsApp atau telepon.",
+        variant: "destructive",
       });
-      
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        subject: '',
-        message: ''
-      });
-      
+    } finally {
       setIsSubmitting(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -89,8 +139,7 @@ const ContactPage = () => {
               <p className="text-muted-foreground mb-8">
                 Jangan ragu untuk menghubungi kami jika Anda memiliki pertanyaan tentang produk, pesanan, atau informasi lainnya. Tim kami siap membantu Anda.
               </p>
-              
-              <div className="space-y-6">
+                <div className="space-y-6">
                 <div className="flex items-start">
                   <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
                     <MapPin className="h-6 w-6 text-primary" />
@@ -98,8 +147,11 @@ const ContactPage = () => {
                   <div>
                     <h3 className="font-semibold text-lg mb-1">Alamat</h3>
                     <p className="text-muted-foreground">
-                      Jl. Batik Indah No. 123<br />
-                      Yogyakarta, Indonesia 55281
+                      {contactInfo?.address || "Jl. Kenanga Indah No. 1"}<br />
+                      {contactInfo?.city && contactInfo?.state 
+                        ? `${contactInfo.city}, ${contactInfo.state}` 
+                        : "Solo, Jawa Tengah"} {contactInfo?.postalCode || "57123"}<br />
+                      {contactInfo?.country || "Indonesia"}
                     </p>
                   </div>
                 </div>
@@ -111,8 +163,10 @@ const ContactPage = () => {
                   <div>
                     <h3 className="font-semibold text-lg mb-1">Telepon</h3>
                     <p className="text-muted-foreground">
-                      +62 812 3456 7890<br />
-                      +62 274 123456
+                      {contactInfo?.phone || "+62 812 9876 5432"}<br />
+                      {contactInfo?.whatsapp && contactInfo.whatsapp !== contactInfo.phone && (
+                        <>WhatsApp: {contactInfo.whatsapp}</>
+                      )}
                     </p>
                   </div>
                 </div>
@@ -124,8 +178,7 @@ const ContactPage = () => {
                   <div>
                     <h3 className="font-semibold text-lg mb-1">Email</h3>
                     <p className="text-muted-foreground">
-                      info@batikelegance.com<br />
-                      cs@batikelegance.com
+                      {contactInfo?.email || "info@batikenanga.com"}
                     </p>
                   </div>
                 </div>
@@ -134,18 +187,26 @@ const ContactPage = () => {
               <div className="mt-12">
                 <h3 className="font-semibold text-lg mb-4">Jam Operasional</h3>
                 <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Senin - Jumat</span>
-                    <span>08:00 - 17:00 WIB</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Sabtu</span>
-                    <span>09:00 - 15:00 WIB</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Minggu & Hari Libur</span>
-                    <span>Tutup</span>
-                  </div>
+                  {businessHours ? (
+                    <div className="text-muted-foreground whitespace-pre-line">
+                      {businessHours}
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Senin - Jumat</span>
+                        <span>08:00 - 17:00 WIB</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Sabtu</span>
+                        <span>09:00 - 15:00 WIB</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Minggu & Hari Libur</span>
+                        <span>Tutup</span>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </motion.div>
@@ -241,9 +302,7 @@ const ContactPage = () => {
             </motion.div>
           </div>
         </div>
-      </section>
-
-      {/* Map Section */}
+      </section>      {/* Map Section */}
       <section className="py-16 bg-secondary/30">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-12">
@@ -252,16 +311,21 @@ const ContactPage = () => {
               Kunjungi toko kami untuk melihat koleksi batik secara langsung
             </p>
           </div>
-          <div className="rounded-lg overflow-hidden shadow-lg">
-            <div className="aspect-video bg-muted relative">
-              <img  alt="Peta lokasi Batik Elegance" className="w-full h-full object-cover" src="https://images.unsplash.com/photo-1569336415962-a4bd9f69cd83" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="bg-white p-4 rounded-lg shadow-lg max-w-xs">
-                  <h3 className="font-semibold mb-1">Batik Elegance</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Jl. Batik Indah No. 123, Yogyakarta, Indonesia 55281
-                  </p>
-                </div>
+            {/* Centered map container */}
+          <div className="max-w-4xl mx-auto">
+            <div className="rounded-lg overflow-hidden shadow-lg">
+              <div className="aspect-video bg-muted relative">
+                <iframe 
+                  src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d31638.19150524388!2d110.7997644!3d-7.5995639!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a1754da29ece5%3A0xe39c30c7a7ee239d!2sGraha%20Batik%20Kenanga!5e0!3m2!1sid!2sid!4v1749520245617!5m2!1sid!2sid" 
+                  width="100%" 
+                  height="100%" 
+                  style={{border:0}} 
+                  allowFullScreen="" 
+                  loading="lazy" 
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Graha Batik Kenanga Location"
+                  className="w-full h-full"
+                />
               </div>
             </div>
           </div>
