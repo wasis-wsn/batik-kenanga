@@ -10,7 +10,6 @@ const RichTextEditor = ({
   height = 400,
   preview = 'edit',
   hideToolbar = false,
-  visibleDragBar = false,
   className = "",
   ...props 
 }) => {
@@ -23,7 +22,6 @@ const RichTextEditor = ({
         height={height}
         preview={preview}
         hideToolbar={hideToolbar}
-        visibleDragBar={visibleDragBar}
         data-color-mode="light"
         {...props}
       />

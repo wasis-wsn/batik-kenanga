@@ -27,6 +27,7 @@ import AdminSetupPage from '@/pages/admin/AdminSetupPage';
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
 import ProductsManagementPage from '@/pages/admin/ProductsManagementPage';
 import ProductFormPage from '@/pages/admin/ProductFormPage';
+import ProductViewPage from '@/pages/admin/ProductViewPage';
 import CategoriesManagementPage from '@/pages/admin/CategoriesManagementPage';
 import CategoryFormPage from '@/pages/admin/CategoryFormPage';
 import NewsManagementPage from '@/pages/admin/NewsManagementPage';
@@ -67,11 +68,10 @@ function App() {
                 <Routes>
                   {/* Dashboard */}
                   <Route path="/" element={<AdminDashboardPage />} />
-                  <Route path="/dashboard" element={<AdminDashboardPage />} />
-
-                  {/* Products Management */}
+                  <Route path="/dashboard" element={<AdminDashboardPage />} />                  {/* Products Management */}
                   <Route path="/products" element={<ProductsManagementPage />} />
                   <Route path="/products/new" element={<ProductFormPage />} />
+                  <Route path="/products/:id" element={<ProductViewPage />} />
                   <Route path="/products/:id/edit" element={<ProductFormPage />} />
 
                   {/* Categories Management */}

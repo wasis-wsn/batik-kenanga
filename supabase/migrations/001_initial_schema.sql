@@ -12,12 +12,37 @@ create table public.categories (
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
+-- Create colors table
+create table public.colors (
+  id uuid default uuid_generate_v4() primary key,
+  name text not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Create cap_patterns table
+create table public.cap_patterns (
+  id uuid default uuid_generate_v4() primary key,
+  name text not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Create tiedye_patterns table
+create table public.tiedye_patterns (
+  id uuid default uuid_generate_v4() primary key,
+  name text not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
 -- Create products table
 create table public.products (
   id uuid default uuid_generate_v4() primary key,
   name text not null,
   description text,
   price numeric(10,2) not null,
+  slug text unique not null,
   category_id uuid references public.categories(id) on delete set null,
   image_url text,
   rating numeric(3,2) default 0,
@@ -32,7 +57,7 @@ create table public.products (
   origin text,
   coloring text,
   care_instructions text,
-  stamping_tools text[] default '{}',
+  stamping_tools jsonb default '[]',
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -43,7 +68,6 @@ create table public.product_images (
   product_id uuid references public.products(id) on delete cascade,
   url text not null,
   caption text,
-  is_primary boolean default false,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 

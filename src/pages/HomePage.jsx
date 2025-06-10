@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, Palette, ShieldCheck, Scroll, Users, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/ProductCard';
-import { products as allProducts } from '@/data/productData';
-import { categories as allCategories } from '@/data/categoryData';
+import { productService } from '@/services/productService';
 import { useCompanyInfo } from '@/hooks/useCompanyInfo';
+import { useToast } from '@/components/ui/use-toast';
 
 const HeroSection = () => {
   const { companyInfo } = useCompanyInfo();
@@ -107,8 +107,31 @@ const CompanyProfileSection = () => {
 };
 
 const FeaturedProductsSection = () => {
-  const featuredProducts = allProducts.filter(product => product.featured).slice(0, 10);
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
   const scrollRef = React.useRef(null);
+
+  useEffect(() => {
+    loadFeaturedProducts();
+  }, []);
+
+  const loadFeaturedProducts = async () => {
+    try {
+      setLoading(true);
+      const products = await productService.getAllProducts({ featured: true, limit: 10 });
+      setFeaturedProducts(products);
+    } catch (error) {
+      console.error('Error loading featured products:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load featured products',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const scroll = (direction) => {
     const element = scrollRef.current;
@@ -120,6 +143,23 @@ const FeaturedProductsSection = () => {
       element.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
   };
+
+  if (loading) {
+    return (
+      <section className="py-16 lg:py-24 bg-secondary/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading featured products...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (featuredProducts.length === 0) {
+    return null;
+  }
 
   return (
     <section className="py-16 lg:py-24 bg-secondary/30">
@@ -177,6 +217,67 @@ const FeaturedProductsSection = () => {
 };
 
 const CollectionsSection = () => {
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  // Helper function to construct proper category image URL
+  const getCategoryImageUrl = (category) => {
+    // If the image_url contains the full Supabase storage URL, use it directly
+    if (category.image_url && category.image_url.includes('supabase.co/storage')) {
+      return category.image_url;
+    }
+
+    // If we have a category ID, construct the proper Supabase storage path
+    if (category.id) {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      // Assume the file extension is jpg (or check the image_url for extension)
+      const fileExtension = category.image_url?.split('.').pop() || 'jpg';
+      return `${supabaseUrl}/storage/v1/object/public/images/category/${category.id}/category${category.id}.${fileExtension}`;
+    }
+
+    // Fallback to the original image_url or default image
+    return category.image_url || '/images/batik_koleksi.jpg';
+  };
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  const loadCategories = async () => {
+    try {
+      setLoading(true);
+      const categoriesData = await productService.getAllCategories();
+      setCategories(categoriesData);
+    } catch (error) {
+      console.error('Error loading categories:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load categories',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <section className="py-16 lg:py-24 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading categories...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (categories.length === 0) {
+    return null;
+  }
+
   return (
     <section className="py-16 lg:py-24 bg-background">
       <div className="container mx-auto px-4">
@@ -187,7 +288,7 @@ const CollectionsSection = () => {
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {allCategories.map((category, index) => (
+          {categories.map((category, index) => (
             <motion.div
               key={category.id}
               initial={{ opacity: 0, y: 30 }}
@@ -195,10 +296,13 @@ const CollectionsSection = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.15 }}
             >
-              <Link to={`/products?category=${category.id}`} className="block group">
-                <div className="bg-card rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 h-full flex flex-col">
-                  <div className="aspect-video bg-muted relative overflow-hidden">
-                    <img src={category.imageUrl} alt={category.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+              <Link to={`/products?category=${category.slug || category.id}`} className="block group">
+                <div className="bg-card rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 h-full flex flex-col">                  <div className="aspect-video bg-muted relative overflow-hidden">
+                    <img 
+                      src={getCategoryImageUrl(category)} 
+                      alt={category.name} 
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
+                    />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent flex items-end">
                       <h3 className="text-primary-foreground font-montserrat font-semibold text-2xl p-6">{category.name}</h3>
                     </div>

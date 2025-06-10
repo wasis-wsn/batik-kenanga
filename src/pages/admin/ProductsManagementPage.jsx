@@ -19,11 +19,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
-import { 
-  getAllProducts,
-  getAllCategories,
-  deleteProduct
-} from '@/services/supabase';
+import { productService } from '@/services/productService';
 import {
   Plus,
   Search,
@@ -48,12 +44,12 @@ const ProductsManagementPage = () => {
   useEffect(() => {
     loadData();
   }, []);
-
   const loadData = async () => {
     try {
-      setLoading(true);      const [productsData, categoriesData] = await Promise.all([
-        getAllProducts(),
-        getAllCategories(),
+      setLoading(true);
+      const [productsData, categoriesData] = await Promise.all([
+        productService.getAllProducts(),
+        productService.getAllCategories(),
       ]);
       setProducts(productsData);
       setCategories(categoriesData);
@@ -68,10 +64,11 @@ const ProductsManagementPage = () => {
       setLoading(false);
     }
   };
-
   const handleDeleteProduct = async (id) => {
-    if (!confirm('Are you sure you want to delete this product?')) return;    try {
-      await deleteProduct(id);
+    if (!confirm('Are you sure you want to delete this product?')) return;
+    
+    try {
+      await productService.deleteProduct(id);
       await loadData();
       toast({
         title: 'Success',
@@ -85,11 +82,9 @@ const ProductsManagementPage = () => {
         variant: 'destructive',
       });
     }
-  };
-
-  const toggleFeatured = async (id, currentFeatured) => {
+  };  const toggleFeatured = async (id, currentFeatured) => {
     try {
-      await db.updateProduct(id, { featured: !currentFeatured });
+      await productService.updateProductFields(id, { featured: !currentFeatured });
       await loadData();
       toast({
         title: 'Success',
@@ -104,12 +99,11 @@ const ProductsManagementPage = () => {
       });
     }
   };
-
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          product.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || 
-                           product.categories?.slug === selectedCategory;
+                           product.category_id === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -205,15 +199,14 @@ const ProductsManagementPage = () => {
                     className="pl-8"
                   />
                 </div>
-              </div>
-              <select
+              </div>              <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="all">All Categories</option>
                 {categories.map((category) => (
-                  <option key={category.id} value={category.slug}>
+                  <option key={category.id} value={category.id}>
                     {category.name}
                   </option>
                 ))}
@@ -223,8 +216,7 @@ const ProductsManagementPage = () => {
         </Card>
 
         {/* Products Table */}
-        <Card>
-          <CardHeader>
+        <Card>          <CardHeader>
             <CardTitle>Products ({filteredProducts.length})</CardTitle>
             <CardDescription>
               A list of all products in your store
@@ -239,7 +231,6 @@ const ProductsManagementPage = () => {
                   <TableHead>Price</TableHead>
                   <TableHead>Stock</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Rating</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -263,7 +254,7 @@ const ProductsManagementPage = () => {
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline">
-                        {product.categories?.name || 'No Category'}
+                        {categories.find(cat => cat.id === product.category_id)?.name || 'No Category'}
                       </Badge>
                     </TableCell>
                     <TableCell>{formatCurrency(product.price)}</TableCell>
@@ -282,12 +273,6 @@ const ProductsManagementPage = () => {
                             Featured
                           </Badge>
                         )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center">
-                        <Star className="w-4 h-4 text-yellow-400 mr-1" />
-                        {product.rating}
                       </div>
                     </TableCell>
                     <TableCell className="text-right">

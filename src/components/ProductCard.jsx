@@ -28,7 +28,7 @@ const ProductCard = ({ product }) => {
         <Card className="product-card h-full overflow-hidden border border-border/50 hover:border-primary/50 transition-all duration-300">
           <div className="relative aspect-square overflow-hidden">
             <img 
-              src={product.imageUrl} 
+              src={product.image_url} 
               alt={product.name} 
               className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
             />
@@ -41,7 +41,7 @@ const ProductCard = ({ product }) => {
           <CardContent className="p-4">
             <h3 className="font-medium text-foreground line-clamp-1">{product.name}</h3>
             <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{product.description}</p>
-            <div className="mt-2 font-semibold text-foreground">{formatCurrency(product.price)}</div>
+            <div className="mt-2 font-semibold text-foreground">{formatCurrency(product.price)}/M</div>
           </CardContent>
           <CardFooter className="p-4 pt-0">
             <Button 

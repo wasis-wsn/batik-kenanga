@@ -13,8 +13,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import ProductCard from '@/components/ProductCard';
-import { products as allProducts } from '@/data/productData';
-import { categories as allCategories, colors as allColors, capPatterns as allCapPatterns, tiedyePatterns as allTiedyePatterns } from '@/data/categoryData';
+import { productService } from '@/services/productService';
+import { useToast } from '@/components/ui/use-toast';
 
 const FilterSidebar = ({ 
   activeCategory, 
@@ -23,6 +23,10 @@ const FilterSidebar = ({
   activeColors,
   activeCapPatterns,
   activeTiedyePatterns,
+  allCategories,
+  allColors,
+  allCapPatterns,
+  allTiedyePatterns,
   handleCategoryChange, 
   handleSearchChange, 
   handlePriceChange,
@@ -205,11 +209,11 @@ const ProductGrid = ({ products }) => {
   );
 };
 
-const HeroCarousel = () => {
+const HeroCarousel = ({ featuredProducts = [] }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const featuredImages = allProducts
-    .filter(product => product.featured)
-    .map(product => product.imageUrl);
+  const featuredImages = featuredProducts
+    .filter(product => product.featured && product.image_url)
+    .map(product => product.image_url);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -285,10 +289,20 @@ const HeroCarousel = () => {
 
 const ProductsPage = () => {
   const location = useLocation();
+  const { toast } = useToast();
   const queryParams = new URLSearchParams(location.search);
   const categoryParam = queryParams.get('category');
 
-  const [filteredProducts, setFilteredProducts] = useState(allProducts);
+  // Data states
+  const [allProducts, setAllProducts] = useState([]);
+  const [allCategories, setAllCategories] = useState([]);
+  const [allColors, setAllColors] = useState([]);
+  const [allCapPatterns, setAllCapPatterns] = useState([]);
+  const [allTiedyePatterns, setAllTiedyePatterns] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Filter states
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [activeCategory, setActiveCategory] = useState(categoryParam || 'all');
   const [searchTerm, setSearchTerm] = useState('');
   const [priceRange, setPriceRange] = useState([0, 10000000]);
@@ -297,20 +311,54 @@ const ProductsPage = () => {
   const [activeCapPatterns, setActiveCapPatterns] = useState([]);
   const [activeTiedyePatterns, setActiveTiedyePatterns] = useState([]);
 
+  // Load initial data
   useEffect(() => {
+    loadInitialData();
+  }, []);
+
+  const loadInitialData = async () => {
+    try {
+      setLoading(true);
+      const [products, categories, filters] = await Promise.all([
+        productService.getAllProducts(),
+        productService.getAllCategories(),
+        productService.getAllFilters()
+      ]);
+      
+      setAllProducts(products);
+      setAllCategories(categories);
+      setAllColors(filters.colors || []);
+      setAllCapPatterns(filters.cap_patterns || []);
+      setAllTiedyePatterns(filters.tiedye_patterns || []);
+    } catch (error) {
+      console.error('Error loading data:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load products data',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    if (allProducts.length === 0) return;
+    
     let updatedProducts = [...allProducts];
 
     // Category filter
     if (activeCategory !== 'all') {
       updatedProducts = updatedProducts.filter(product => {
+        // Handle special category logic for legacy data structure compatibility
         if (activeCategory === 'batik-kenanga-collection') {
-          return product.colors.length === 1 && product.capPatterns.length === 1 && product.tiedyePatterns.length === 0;
+          return product.colors?.length === 1 && product.cap_patterns?.length === 1 && (!product.tiedye_patterns || product.tiedye_patterns.length === 0);
         } else if (activeCategory === 'custom-color') {
-          return product.colors.length > 1;
+          return product.colors?.length > 1;
         } else if (activeCategory === 'custom-design') {
-          return product.colors.length > 1 || product.capPatterns.length > 1 || product.tiedyePatterns.length > 0;
+          return product.colors?.length > 1 || product.cap_patterns?.length > 1 || (product.tiedye_patterns && product.tiedye_patterns.length > 0);
         }
-        return product.category === activeCategory;
+        // Standard category filtering by category_id or slug
+        return product.category_id === activeCategory || product.categories?.slug === activeCategory;
       });
     }
 
@@ -332,26 +380,26 @@ const ProductsPage = () => {
     // Color filter
     if (activeColors.length > 0) {
       updatedProducts = updatedProducts.filter(product =>
-        product.colors.some(color => activeColors.includes(color))
+        product.colors?.some(color => activeColors.includes(color))
       );
     }
 
     // Cap pattern filter
     if (activeCapPatterns.length > 0) {
       updatedProducts = updatedProducts.filter(product =>
-        product.capPatterns.some(pattern => activeCapPatterns.includes(pattern))
+        product.cap_patterns?.some(pattern => activeCapPatterns.includes(pattern))
       );
     }
 
     // Tie-dye pattern filter
     if (activeTiedyePatterns.length > 0) {
       updatedProducts = updatedProducts.filter(product =>
-        product.tiedyePatterns.some(pattern => activeTiedyePatterns.includes(pattern))
+        product.tiedye_patterns?.some(pattern => activeTiedyePatterns.includes(pattern))
       );
     }
 
     setFilteredProducts(updatedProducts);
-  }, [activeCategory, searchTerm, priceRange, activeColors, activeCapPatterns, activeTiedyePatterns]);
+  }, [allProducts, activeCategory, searchTerm, priceRange, activeColors, activeCapPatterns, activeTiedyePatterns]);
 
   useEffect(() => {
     if (categoryParam) {
@@ -400,12 +448,24 @@ const ProductsPage = () => {
     params.delete('category');
     window.history.replaceState({}, '', `${location.pathname}?${params.toString()}`);
   };
-
   const toggleFilters = () => setShowFilters(!showFilters);
+
+  if (loading) {
+    return (
+      <div className="bg-background font-lora">
+        <div className="container mx-auto px-4 py-16 flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading products...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-background font-lora">
-      <HeroCarousel />
+      <HeroCarousel featuredProducts={allProducts} />
 
       <section className="py-12 lg:py-16">
         <div className="container mx-auto px-4">
@@ -430,6 +490,10 @@ const ProductsPage = () => {
                 activeColors={activeColors}
                 activeCapPatterns={activeCapPatterns}
                 activeTiedyePatterns={activeTiedyePatterns}
+                allCategories={allCategories}
+                allColors={allColors}
+                allCapPatterns={allCapPatterns}
+                allTiedyePatterns={allTiedyePatterns}
                 handleCategoryChange={handleCategoryChange}
                 handleSearchChange={handleSearchChange}
                 handlePriceChange={handlePriceChange}
@@ -445,10 +509,9 @@ const ProductsPage = () => {
                 <p className="text-muted-foreground font-lora mb-2 sm:mb-0">
                   Menampilkan {filteredProducts.length} dari {allProducts.length} produk
                 </p>
-                <div className="flex items-center space-x-2 flex-wrap">
-                  {activeCategory !== 'all' && (
+                <div className="flex items-center space-x-2 flex-wrap">                  {activeCategory !== 'all' && (
                     <div className="bg-primary/10 text-primary text-sm py-1.5 px-3 rounded-full flex items-center font-lora">
-                      {allCategories.find(cat => cat.id === activeCategory)?.name}
+                      {allCategories.find(cat => cat.id === activeCategory || cat.slug === activeCategory)?.name || activeCategory}
                       <button onClick={() => handleCategoryChange('all')} className="ml-2 focus:outline-none">
                         <X className="h-4 w-4" />
                       </button>
@@ -456,7 +519,7 @@ const ProductsPage = () => {
                   )}
                   {activeColors.map(colorId => (
                     <div key={colorId} className="bg-primary/10 text-primary text-sm py-1.5 px-3 rounded-full flex items-center font-lora">
-                      {allColors.find(c => c.id === colorId)?.name}
+                      {allColors.find(c => c.id === colorId)?.name || colorId}
                       <button onClick={() => handleColorChange(colorId)} className="ml-2 focus:outline-none">
                         <X className="h-4 w-4" />
                       </button>
@@ -464,7 +527,7 @@ const ProductsPage = () => {
                   ))}
                   {activeCapPatterns.map(patternId => (
                     <div key={patternId} className="bg-primary/10 text-primary text-sm py-1.5 px-3 rounded-full flex items-center font-lora">
-                      {allCapPatterns.find(p => p.id === patternId)?.name}
+                      {allCapPatterns.find(p => p.id === patternId)?.name || patternId}
                       <button onClick={() => handleCapPatternChange(patternId)} className="ml-2 focus:outline-none">
                         <X className="h-4 w-4" />
                       </button>
@@ -472,7 +535,7 @@ const ProductsPage = () => {
                   ))}
                   {activeTiedyePatterns.map(patternId => (
                     <div key={patternId} className="bg-primary/10 text-primary text-sm py-1.5 px-3 rounded-full flex items-center font-lora">
-                      {allTiedyePatterns.find(p => p.id === patternId)?.name}
+                      {allTiedyePatterns.find(p => p.id === patternId)?.name || patternId}
                       <button onClick={() => handleTiedyePatternChange(patternId)} className="ml-2 focus:outline-none">
                         <X className="h-4 w-4" />
                       </button>
@@ -488,8 +551,7 @@ const ProductsPage = () => {
                   )}
                 </div>
               </div>
-              
-              {activeCategory !== 'all' && (
+                {activeCategory !== 'all' && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -499,17 +561,17 @@ const ProductsPage = () => {
                   <div className="flex items-start">
                     <div className="flex-shrink-0 w-16 h-16 mr-4 overflow-hidden rounded-lg">
                       <img 
-                        src={allCategories.find(cat => cat.id === activeCategory)?.imageUrl}
-                        alt={allCategories.find(cat => cat.id === activeCategory)?.name}
+                        src={allCategories.find(cat => cat.id === activeCategory || cat.slug === activeCategory)?.image_url || '/images/batik_koleksi.jpg'}
+                        alt={allCategories.find(cat => cat.id === activeCategory || cat.slug === activeCategory)?.name || activeCategory}
                         className="w-full h-full object-cover"
                       />
                     </div>
                     <div>
                       <h3 className="font-montserrat font-semibold text-lg mb-1">
-                        {allCategories.find(cat => cat.id === activeCategory)?.name}
+                        {allCategories.find(cat => cat.id === activeCategory || cat.slug === activeCategory)?.name || activeCategory}
                       </h3>
                       <p className="text-muted-foreground text-sm">
-                        {allCategories.find(cat => cat.id === activeCategory)?.description}
+                        {allCategories.find(cat => cat.id === activeCategory || cat.slug === activeCategory)?.description || 'Category description'}
                       </p>
                     </div>
                   </div>
