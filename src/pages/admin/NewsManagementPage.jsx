@@ -7,13 +7,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Badge } from '../../components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../../components/ui/dropdown-menu';
 import { useToast } from '../../components/ui/use-toast';
-import { getAllNews, deleteNews } from '../../services/supabase';
+import { ConfirmationModal } from '../../components/ui/confirmation-modal';
+import { getAllNews, deleteNews, deleteNewsFiles } from '../../services/supabase';
 
 const NewsManagementPage = () => {
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [newsToDelete, setNewsToDelete] = useState(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -35,12 +38,18 @@ const NewsManagementPage = () => {
     } finally {
       setLoading(false);
     }
+  };  const handleDelete = (id) => {
+    setNewsToDelete(id);
+    setShowDeleteModal(true);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this news article?')) {
+  const confirmDelete = async () => {
+    if (newsToDelete) {
       try {
-        await deleteNews(id);
+        // Delete associated files first
+        await deleteNewsFiles(newsToDelete);
+        // Then delete the news record
+        await deleteNews(newsToDelete);
         toast({
           title: "Success",
           description: "News article deleted successfully",
@@ -55,6 +64,8 @@ const NewsManagementPage = () => {
         });
       }
     }
+    setShowDeleteModal(false);
+    setNewsToDelete(null);
   };
 
   const getStatusBadge = (status) => {
@@ -221,9 +232,20 @@ const NewsManagementPage = () => {
                 </TableBody>
               </Table>
             </div>
-          )}
-        </CardContent>
+          )}        </CardContent>
       </Card>
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={confirmDelete}
+        title="Delete News Article"
+        message="Are you sure you want to delete this news article? This will also delete all associated files."
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </div>
   );
 };

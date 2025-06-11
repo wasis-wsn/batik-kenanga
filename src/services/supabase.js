@@ -78,11 +78,10 @@ const supabaseHelpers = {
   // Products
   async getAllProducts(filters = {}) {
     let query = supabase
-      .from('products')
-      .select(`
+      .from('products')      .select(`
         *,
         categories!products_category_id_fkey(name, slug),
-        product_images(url, caption, is_primary)
+        product_images(url, caption)
       `);
 
     if (filters.category_id) {
@@ -103,14 +102,13 @@ const supabaseHelpers = {
     if (error) throw error;
     return data;
   },
-
   async getProductById(id) {
     const { data, error } = await supabase
       .from('products')
       .select(`
         *,
         categories!products_category_id_fkey(name, slug),
-        product_images(url, caption, is_primary)
+        product_images(url, caption)
       `)
       .eq('id', id)
       .single();
@@ -118,14 +116,13 @@ const supabaseHelpers = {
     if (error) throw error;
     return data;
   },
-
   async getProductBySlug(slug) {
     const { data, error } = await supabase
       .from('products')
       .select(`
         *,
         categories!products_category_id_fkey(name, slug),
-        product_images(url, caption, is_primary)
+        product_images(url, caption)
       `)
       .eq('slug', slug)
       .single();
@@ -165,14 +162,13 @@ const supabaseHelpers = {
     
     if (error) throw error;
   },
-
   async getProductsByCategory(categoryId) {
     const { data, error } = await supabase
       .from('products')
       .select(`
         *,
         categories!products_category_id_fkey(name, slug),
-        product_images(url, caption, is_primary)
+        product_images(url, caption)
       `)
       .eq('category_id', categoryId)
       .order('created_at', { ascending: false });
@@ -180,14 +176,13 @@ const supabaseHelpers = {
     if (error) throw error;
     return data;
   },
-
   async searchProducts(query) {
     const { data, error } = await supabase
       .from('products')
       .select(`
         *,
         categories!products_category_id_fkey(name, slug),
-        product_images(url, caption, is_primary)
+        product_images(url, caption)
       `)
       .or(`name.ilike.%${query}%, description.ilike.%${query}%`)
       .order('created_at', { ascending: false });
@@ -335,6 +330,154 @@ const supabaseHelpers = {
     if (error) throw error;
     return data;
   },
+  // Testimonial file uploads
+  async uploadTestimonialMainImage(testimonialId, file) {
+    const filePath = `testimonial/${testimonialId}/main.jpg`;
+    const { error: uploadError } = await supabase.storage
+      .from('documents')
+      .upload(filePath, file, { 
+        upsert: true,
+        contentType: file.type
+      });
+    
+    if (uploadError) throw uploadError;
+    
+    const { data: urlData } = supabase.storage
+      .from('documents')
+      .getPublicUrl(filePath);
+    
+    return urlData.publicUrl;
+  },
+
+  async uploadTestimonialGalleryImage(testimonialId, file, imageNumber) {
+    const filePath = `testimonial/${testimonialId}/gambar${imageNumber}.jpg`;
+    const { error: uploadError } = await supabase.storage
+      .from('documents')
+      .upload(filePath, file, { 
+        upsert: true,
+        contentType: file.type
+      });
+    
+    if (uploadError) throw uploadError;
+    
+    const { data: urlData } = supabase.storage
+      .from('documents')
+      .getPublicUrl(filePath);
+    
+    return urlData.publicUrl;
+  },
+
+  async uploadTestimonialLogo(testimonialId, file) {
+    const filePath = `testimonial/${testimonialId}/logo.jpg`;
+    const { error: uploadError } = await supabase.storage
+      .from('documents')
+      .upload(filePath, file, { 
+        upsert: true,
+        contentType: file.type
+      });
+    
+    if (uploadError) throw uploadError;
+    
+    const { data: urlData } = supabase.storage
+      .from('documents')
+      .getPublicUrl(filePath);
+    
+    return urlData.publicUrl;
+  },
+
+  async uploadTestimonialPrintingMethod(testimonialId, file) {
+    const filePath = `testimonial/${testimonialId}/printing/teknikbatik.jpg`;
+    const { error: uploadError } = await supabase.storage
+      .from('documents')
+      .upload(filePath, file, { 
+        upsert: true,
+        contentType: file.type
+      });
+    
+    if (uploadError) throw uploadError;
+    
+    const { data: urlData } = supabase.storage
+      .from('documents')
+      .getPublicUrl(filePath);
+    
+    return urlData.publicUrl;
+  },
+  async deleteTestimonialFiles(testimonialId) {
+    // Delete all files related to a testimonial
+    const filePaths = [
+      `testimonial/${testimonialId}/main.jpg`,
+      `testimonial/${testimonialId}/logo.jpg`,
+      `testimonial/${testimonialId}/printing/teknikbatik.jpg`,
+      `testimonial/${testimonialId}/gambar1.jpg`,
+      `testimonial/${testimonialId}/gambar2.jpg`,
+      `testimonial/${testimonialId}/gambar3.jpg`
+    ];
+
+    // Delete files (ignore errors for non-existent files)
+    for (const filePath of filePaths) {
+      await supabase.storage
+        .from('documents')
+        .remove([filePath]);
+    }
+  },
+
+  // News file uploads
+  async uploadNewsMainImage(newsId, file) {
+    const filePath = `news/${newsId}/main.jpg`;
+    const { error: uploadError } = await supabase.storage
+      .from('documents')
+      .upload(filePath, file, { 
+        upsert: true,
+        contentType: file.type
+      });
+    
+    if (uploadError) throw uploadError;
+    
+    const { data: urlData } = supabase.storage
+      .from('documents')
+      .getPublicUrl(filePath);
+    
+    return urlData.publicUrl;
+  },
+
+  async uploadNewsRelatedImage(newsId, file, imageNumber) {
+    const filePath = `news/${newsId}/gambar${imageNumber}.jpg`;
+    const { error: uploadError } = await supabase.storage
+      .from('documents')
+      .upload(filePath, file, { 
+        upsert: true,
+        contentType: file.type
+      });
+    
+    if (uploadError) throw uploadError;
+    
+    const { data: urlData } = supabase.storage
+      .from('documents')
+      .getPublicUrl(filePath);
+    
+    return urlData.publicUrl;
+  },
+
+  async deleteNewsFiles(newsId) {
+    // Delete main image
+    const mainImagePath = `news/${newsId}/main.jpg`;
+    await supabase.storage
+      .from('documents')
+      .remove([mainImagePath]);
+
+    // Delete related images (up to 10 images)
+    const relatedImagePaths = [];
+    for (let i = 1; i <= 10; i++) {
+      relatedImagePaths.push(`news/${newsId}/gambar${i}.jpg`);
+    }
+
+    // Delete files (ignore errors for non-existent files)
+    for (const filePath of relatedImagePaths) {
+      await supabase.storage
+        .from('documents')
+        .remove([filePath]);
+    }
+  },
 
   // Company Info
   async getCompanyInfo() {
@@ -409,10 +552,9 @@ const supabaseHelpers = {
     
     if (error) throw error;
   },
-
   // File Storage
   async uploadFile(file, path) {
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from('images')
       .upload(path, file);
     
@@ -492,20 +634,26 @@ export const {
   deleteProduct,
   getProductsByCategory,
   searchProducts,
-
   // News
   getAllNews,
   getNewsById,
   getNewsBySlug,
   createNews,
   updateNews,
-  deleteNews,  // Testimonials
+  deleteNews,
+  uploadNewsMainImage,
+  uploadNewsRelatedImage,
+  deleteNewsFiles,// Testimonials
   getAllTestimonials,
   getTestimonialById,
-  createTestimonial,
-  updateTestimonial,
+  createTestimonial,  updateTestimonial,
   deleteTestimonial,
   getFeaturedTestimonials,
+  uploadTestimonialMainImage,
+  uploadTestimonialGalleryImage,
+  uploadTestimonialLogo,
+  uploadTestimonialPrintingMethod,
+  deleteTestimonialFiles,
 
   // Company Info
   getCompanyInfo,

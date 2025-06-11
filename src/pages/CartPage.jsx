@@ -2,30 +2,86 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Trash2, Plus, Minus, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Trash2, Plus, Minus, ShoppingBag, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
 import { formatCurrency } from '@/lib/utils';
 import { useToast } from '@/components/ui/use-toast';
+import { ConfirmationModal } from '@/components/ui/confirmation-modal';
 
 const CartPage = () => {
   const { cartItems, updateQuantity, removeFromCart, clearCart, getCartTotal } = useCart();
   const { toast } = useToast();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [showClearModal, setShowClearModal] = useState(false);
+  const [showRemoveModal, setShowRemoveModal] = useState(false);
+  const [itemToRemove, setItemToRemove] = useState(null);
 
-  const handleCheckout = () => {
-    setIsCheckingOut(true);
+  const generateWhatsAppMessage = () => {
+    let message = "Halo, saya tertarik untuk memesan:\n\n";
     
-    // Simulate checkout process
-    setTimeout(() => {
+    cartItems.forEach((item, index) => {
+      message += `${index + 1}. ${item.name}\n`;
+      message += `   Harga: ${formatCurrency(item.price)}\n`;
+      message += `   Jumlah: ${item.quantity}\n`;
+      if (item.material) message += `   Material: ${item.material}\n`;
+      if (item.size) message += `   Ukuran: ${item.size}\n`;
+      message += `   Subtotal: ${formatCurrency(item.price * item.quantity)}\n\n`;
+    });
+    
+    message += `Total Keseluruhan: ${formatCurrency(getCartTotal())}\n\n`;
+    message += "Mohon informasi untuk proses pemesanan. Terima kasih!";
+    
+    return encodeURIComponent(message);
+  };
+
+  const handleWhatsAppCheckout = () => {
+    setIsCheckingOut(true);
+    const message = generateWhatsAppMessage();
+    const phoneNumber = "6285640263053";
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+    
+    // Open WhatsApp in new tab
+    window.open(whatsappUrl, '_blank');
+    
+    // Show success message
+    toast({
+      title: "Diarahkan ke WhatsApp!",
+      description: "Silakan lanjutkan pemesanan melalui WhatsApp.",
+      duration: 5000,
+    });
+    
+    setIsCheckingOut(false);
+  };
+
+  const handleRemoveItem = (itemId) => {
+    setItemToRemove(itemId);
+    setShowRemoveModal(true);
+  };
+
+  const confirmRemoveItem = () => {
+    if (itemToRemove) {
+      removeFromCart(itemToRemove);
       toast({
-        title: "Pesanan berhasil!",
-        description: "Terima kasih telah berbelanja di Batik Elegance.",
-        duration: 5000,
+        title: "Item dihapus",
+        description: "Produk telah dihapus dari keranjang.",
       });
-      clearCart();
-      setIsCheckingOut(false);
-    }, 2000);
+    }
+    setShowRemoveModal(false);
+    setItemToRemove(null);
+  };
+
+  const handleClearCart = () => {
+    setShowClearModal(true);
+  };
+
+  const confirmClearCart = () => {
+    clearCart();
+    toast({
+      title: "Keranjang dikosongkan",
+      description: "Semua produk telah dihapus dari keranjang.",
+    });
+    setShowClearModal(false);
   };
 
   if (cartItems.length === 0) {
@@ -54,10 +110,12 @@ const CartPage = () => {
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          <div className="lg:col-span-2">            <div className="bg-white rounded-lg shadow-md overflow-hidden">
               <div className="p-6 border-b border-border">
                 <h2 className="text-xl font-semibold">Produk ({cartItems.length})</h2>
+                <p className="text-sm text-muted-foreground mt-2">
+                  <span className="font-medium">Catatan:</span> Ukuran yang ditampilkan hanyalah ukuran yang tersedia untuk produk. Harga tetap dihitung per meter.
+                </p>
               </div>
               
               <div className="divide-y divide-border">
@@ -71,17 +129,19 @@ const CartPage = () => {
                   >
                     <div className="w-full sm:w-20 h-20 rounded-md overflow-hidden mr-0 sm:mr-4 mb-4 sm:mb-0 flex-shrink-0">
                       <img 
-                        src={item.imageUrl} 
+                        src={item.image_url} 
                         alt={item.name} 
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="flex-grow">
-                      <Link to={`/products/${item.id}`} className="font-medium hover:text-primary transition-colors">
+                    <div className="flex-grow">                      <Link to={`/products/${item.id}`} className="font-medium hover:text-primary transition-colors">
                         {item.name}
                       </Link>
                       <p className="text-sm text-muted-foreground mb-2">
-                        {item.details.material}, {item.details.size}
+                        {item.material && `${item.material}`}
+                        {item.material && item.size && ', '}
+                        {item.size && `${item.size}`}
+                        {(!item.material && !item.size) && 'Produk Batik'}
                       </p>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center">
@@ -106,12 +166,11 @@ const CartPage = () => {
                           </Button>
                         </div>
                         <div className="flex items-center">
-                          <span className="font-semibold mr-4">{formatCurrency(item.price * item.quantity)}</span>
-                          <Button 
+                          <span className="font-semibold mr-4">{formatCurrency(item.price * item.quantity)}</span>                          <Button 
                             variant="ghost" 
                             size="icon" 
                             className="text-muted-foreground hover:text-destructive"
-                            onClick={() => removeFromCart(item.id)}
+                            onClick={() => handleRemoveItem(item.id)}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -121,9 +180,8 @@ const CartPage = () => {
                   </motion.div>
                 ))}
               </div>
-              
-              <div className="p-6 border-t border-border flex justify-between">
-                <Button variant="outline" onClick={clearCart}>
+                <div className="p-6 border-t border-border flex justify-between">
+                <Button variant="outline" onClick={handleClearCart}>
                   Kosongkan Keranjang
                 </Button>
                 <Button asChild variant="outline">
@@ -158,11 +216,10 @@ const CartPage = () => {
                   <span className="font-bold text-primary">{formatCurrency(getCartTotal() * 1.1)}</span>
                 </div>
               </div>
-              
-              <div className="p-6">
+                <div className="p-6">
                 <Button 
-                  className="w-full"
-                  onClick={handleCheckout}
+                  className="w-full mb-3"
+                  onClick={handleWhatsAppCheckout}
                   disabled={isCheckingOut}
                 >
                   {isCheckingOut ? (
@@ -172,18 +229,41 @@ const CartPage = () => {
                     </>
                   ) : (
                     <>
-                      Checkout <ArrowRight className="ml-2 h-4 w-4" />
+                      <MessageCircle className="mr-2 h-4 w-4" />
+                      Pesan Sekarang
                     </>
                   )}
                 </Button>
-                <p className="text-xs text-muted-foreground text-center mt-4">
-                  Dengan melakukan checkout, Anda menyetujui syarat dan ketentuan kami.
+                <p className="text-xs text-muted-foreground text-center">
+                  Dengan melakukan pemesanan, Anda menyetujui syarat dan ketentuan kami.
                 </p>
               </div>
-            </div>
-          </div>
+            </div>          </div>
         </div>
       </div>
+
+      {/* Confirmation Modals */}
+      <ConfirmationModal
+        isOpen={showRemoveModal}
+        onClose={() => setShowRemoveModal(false)}
+        onConfirm={confirmRemoveItem}
+        title="Hapus Produk"
+        message="Apakah Anda yakin ingin menghapus produk ini dari keranjang?"
+        confirmText="Hapus"
+        cancelText="Batal"
+        variant="destructive"
+      />
+
+      <ConfirmationModal
+        isOpen={showClearModal}
+        onClose={() => setShowClearModal(false)}
+        onConfirm={confirmClearCart}
+        title="Kosongkan Keranjang"
+        message="Apakah Anda yakin ingin menghapus semua produk dari keranjang?"
+        confirmText="Kosongkan"
+        cancelText="Batal"
+        variant="destructive"
+      />
     </div>
   );
 };

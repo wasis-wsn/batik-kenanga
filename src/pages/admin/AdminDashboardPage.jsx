@@ -8,6 +8,7 @@ import {
   getAllNews, 
   getAllTestimonials 
 } from '@/services/supabase';
+import { mediaLibraryService } from '@/services/mediaLibraryService';
 import {
   Package,
   FileText,
@@ -18,6 +19,7 @@ import {
   ShoppingCart,
   Star,
   Plus,
+  HardDrive,
 } from 'lucide-react';
 
 const StatCard = ({ title, value, description, icon: Icon, trend, color = 'blue' }) => {
@@ -89,12 +91,12 @@ const RecentItem = ({ title, subtitle, href, date }) => (
   </div>
 );
 
-const AdminDashboardPage = () => {
-  const [stats, setStats] = useState({
+const AdminDashboardPage = () => {  const [stats, setStats] = useState({
     products: 0,
     news: 0,
     testimonials: 0,
     featuredProducts: 0,
+    mediaFiles: 0,
   });
   const [recentData, setRecentData] = useState({
     products: [],
@@ -106,7 +108,6 @@ const AdminDashboardPage = () => {
   useEffect(() => {
     loadDashboardData();
   }, []);
-
   const loadDashboardData = async () => {
     try {
       setLoading(true);
@@ -117,11 +118,21 @@ const AdminDashboardPage = () => {
         getAllTestimonials(),
       ]);
 
+      // Try to load media stats
+      let mediaFilesCount = 0;
+      try {
+        const mediaStats = await mediaLibraryService.getStats();
+        mediaFilesCount = mediaStats.total || 0;
+      } catch (error) {
+        console.warn('Could not load media stats:', error);
+      }
+
       setStats({
         products: products.length,
         news: news.length,
         testimonials: testimonials.length,
         featuredProducts: products.filter(p => p.featured).length,
+        mediaFiles: mediaFilesCount,
       });
 
       // Load recent data
@@ -157,10 +168,8 @@ const AdminDashboardPage = () => {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
           <p className="text-gray-600">Welcome to Batik Kenanga Admin Panel</p>
-        </div>
-
-        {/* Stats Grid */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        </div>        {/* Stats Grid */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
           <StatCard
             title="Total Products"
             value={stats.products}
@@ -188,6 +197,13 @@ const AdminDashboardPage = () => {
             description="Customer reviews"
             icon={MessageSquare}
             color="orange"
+          />
+          <StatCard
+            title="Media Files"
+            value={stats.mediaFiles}
+            description="Uploaded files"
+            icon={HardDrive}
+            color="blue"
           />
         </div>
 

@@ -5,9 +5,9 @@ import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table';
-import { Badge } from '../../components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../../components/ui/dropdown-menu';
 import { useToast } from '../../components/ui/use-toast';
+import { ConfirmationModal } from '../../components/ui/confirmation-modal';
 import { supabaseAdmin } from '../../services/supabase';
 import { categoryService } from '../../services/categoryService';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog';
@@ -21,6 +21,10 @@ const CategoriesManagementPage = () => {
   const [filterName, setFilterName] = useState('');
   const [creatingFilter, setCreatingFilter] = useState(false);
   const [filters, setFilters] = useState({ colors: [], cap_patterns: [], tiedye_patterns: [] });
+  const [showDeleteCategoryModal, setShowDeleteCategoryModal] = useState(false);
+  const [showDeleteFilterModal, setShowDeleteFilterModal] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState(null);
+  const [filterToDelete, setFilterToDelete] = useState(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -61,11 +65,15 @@ const CategoriesManagementPage = () => {
     } catch (error) {
       console.error('Error fetching filters:', error);
     }
+  };  const handleDelete = (id) => {
+    setCategoryToDelete(id);
+    setShowDeleteCategoryModal(true);
   };
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this category?')) {
+
+  const confirmDeleteCategory = async () => {
+    if (categoryToDelete) {
       try {
-        await categoryService.deleteCategory(id);
+        await categoryService.deleteCategory(categoryToDelete);
         toast({
           title: "Success",
           description: "Category deleted successfully",
@@ -79,20 +87,21 @@ const CategoriesManagementPage = () => {
           variant: "destructive",
         });
       }
-    }
-  };const handleCreateFilter = async () => {
+    }    setShowDeleteCategoryModal(false);
+    setCategoryToDelete(null);
+  };
+
+  const handleCreateFilter = async () => {
     if (!filterName.trim()) return;
     
     setCreatingFilter(true);
     try {
       // Tentukan tabel berdasarkan filterType
       const tableName = filterType; // colors, cap_patterns, atau tiedye_patterns
-      
-      // Insert ke database Supabase
-      const { data, error } = await supabaseAdmin
+        // Insert ke database Supabase
+      const { error } = await supabaseAdmin
         .from(tableName)
-        .insert([{ name: filterName.trim() }])
-        .select();
+        .insert([{ name: filterName.trim() }]);
       
       if (error) {
         throw error;
@@ -119,14 +128,18 @@ const CategoriesManagementPage = () => {
       setCreatingFilter(false);
     }
   };
+  const handleDeleteFilter = (filterType, filterId, filterName) => {
+    setFilterToDelete({ type: filterType, id: filterId, name: filterName });
+    setShowDeleteFilterModal(true);
+  };
 
-  const handleDeleteFilter = async (filterType, filterId, filterName) => {
-    if (window.confirm(`Are you sure you want to delete "${filterName}"?`)) {
+  const confirmDeleteFilter = async () => {
+    if (filterToDelete) {
       try {
         const { error } = await supabaseAdmin
-          .from(filterType)
+          .from(filterToDelete.type)
           .delete()
-          .eq('id', filterId);
+          .eq('id', filterToDelete.id);
         
         if (error) {
           throw error;
@@ -134,7 +147,7 @@ const CategoriesManagementPage = () => {
         
         toast({
           title: "Success",
-          description: `Deleted ${filterType.replace('_', ' ')}: ${filterName}`,
+          description: `Deleted ${filterToDelete.type.replace('_', ' ')}: ${filterToDelete.name}`,
         });
         
         // Refresh filters after deletion
@@ -143,11 +156,13 @@ const CategoriesManagementPage = () => {
         console.error('Error deleting filter:', error);
         toast({
           title: "Error",
-          description: `Failed to delete ${filterType.replace('_', ' ')}`,
+          description: `Failed to delete ${filterToDelete.type.replace('_', ' ')}`,
           variant: "destructive",
         });
       }
     }
+    setShowDeleteFilterModal(false);
+    setFilterToDelete(null);
   };
 
   const filteredCategories = categories.filter(category =>
@@ -399,9 +414,31 @@ const CategoriesManagementPage = () => {
                 )}
               </div>
             </div>
-          </div>
-        </CardContent>
+          </div>        </CardContent>
       </Card>
+
+      {/* Confirmation Modals */}
+      <ConfirmationModal
+        isOpen={showDeleteCategoryModal}
+        onClose={() => setShowDeleteCategoryModal(false)}
+        onConfirm={confirmDeleteCategory}
+        title="Delete Category"
+        message="Are you sure you want to delete this category?"
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+      />
+
+      <ConfirmationModal
+        isOpen={showDeleteFilterModal}
+        onClose={() => setShowDeleteFilterModal(false)}
+        onConfirm={confirmDeleteFilter}
+        title="Delete Filter"
+        message={`Are you sure you want to delete "${filterToDelete?.name}"?`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </div>
   );
 };

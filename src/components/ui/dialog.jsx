@@ -44,6 +44,14 @@ export const DialogTitle = ({ children }) => {
   );
 };
 
+export const DialogDescription = ({ children }) => {
+  return (
+    <p className="text-sm text-gray-600 mt-2">
+      {children}
+    </p>
+  );
+};
+
 export const DialogFooter = ({ children }) => {
   return (
     <div className="flex justify-end gap-2 mt-6">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Edit, Trash2, Star, User } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, User } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
@@ -7,13 +7,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Badge } from '../../components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../../components/ui/dropdown-menu';
 import { useToast } from '../../components/ui/use-toast';
-import { getAllTestimonials, deleteTestimonial } from '../../services/supabase';
+import { ConfirmationModal } from '../../components/ui/confirmation-modal';
+import { getAllTestimonials, deleteTestimonial, deleteTestimonialFiles } from '../../services/supabase';
 
 const TestimonialsManagementPage = () => {
   const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [testimonialToDelete, setTestimonialToDelete] = useState(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -35,12 +38,18 @@ const TestimonialsManagementPage = () => {
     } finally {
       setLoading(false);
     }
+  };  const handleDelete = (id) => {
+    setTestimonialToDelete(id);
+    setShowDeleteModal(true);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this testimonial?')) {
+  const confirmDelete = async () => {
+    if (testimonialToDelete) {
       try {
-        await deleteTestimonial(id);
+        // Delete associated files first
+        await deleteTestimonialFiles(testimonialToDelete);
+        // Then delete the testimonial record
+        await deleteTestimonial(testimonialToDelete);
         toast({
           title: "Success",
           description: "Testimonial deleted successfully",
@@ -55,28 +64,13 @@ const TestimonialsManagementPage = () => {
         });
       }
     }
+    setShowDeleteModal(false);
+    setTestimonialToDelete(null);
   };
 
-  const renderStars = (rating) => {
-    return (
-      <div className="flex items-center gap-1">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star
-            key={star}
-            className={`h-4 w-4 ${
-              star <= rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
-            }`}
-          />
-        ))}
-        <span className="ml-1 text-sm text-gray-600">({rating})</span>
-      </div>
-    );
-  };
-
-  const filteredTestimonials = testimonials.filter(testimonial => {
-    const matchesSearch = 
+  const filteredTestimonials = testimonials.filter(testimonial => {    const matchesSearch = 
       testimonial.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      testimonial.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      testimonial.feedback.toLowerCase().includes(searchTerm.toLowerCase()) ||
       testimonial.product_name?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || 
       (statusFilter === 'active' && testimonial.is_featured) ||
@@ -150,8 +144,7 @@ const TestimonialsManagementPage = () => {
             <div className="text-center py-8">
               <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-600">No testimonials found</p>
-            </div>
-          ) : (
+            </div>          ) : (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
@@ -159,7 +152,6 @@ const TestimonialsManagementPage = () => {
                     <TableHead>Customer</TableHead>
                     <TableHead>Message</TableHead>
                     <TableHead>Product</TableHead>
-                    <TableHead>Rating</TableHead>
                     <TableHead>Featured</TableHead>
                     <TableHead>Created</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
@@ -170,9 +162,9 @@ const TestimonialsManagementPage = () => {
                     <TableRow key={testimonial.id}>
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          {testimonial.customer_image ? (
+                          {testimonial.image_url ? (
                             <img
-                              src={testimonial.customer_image}
+                              src={testimonial.image_url}
                               alt={testimonial.customer_name}
                               className="h-10 w-10 rounded-full object-cover"
                             />
@@ -193,14 +185,11 @@ const TestimonialsManagementPage = () => {
                       </TableCell>
                       <TableCell className="max-w-md">
                         <div className="text-sm">
-                          {truncateText(testimonial.message, 150)}
+                          {truncateText(testimonial.feedback, 150)}
                         </div>
                       </TableCell>
                       <TableCell>
                         {testimonial.product_name || '-'}
-                      </TableCell>
-                      <TableCell>
-                        {renderStars(testimonial.rating)}
                       </TableCell>
                       <TableCell>
                         <Badge variant={testimonial.is_featured ? 'default' : 'secondary'}>
@@ -239,9 +228,20 @@ const TestimonialsManagementPage = () => {
                 </TableBody>
               </Table>
             </div>
-          )}
-        </CardContent>
+          )}        </CardContent>
       </Card>
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={confirmDelete}
+        title="Delete Testimonial"
+        message="Are you sure you want to delete this testimonial? This will also delete all associated files."
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </div>
   );
 };

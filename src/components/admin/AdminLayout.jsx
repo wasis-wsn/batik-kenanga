@@ -190,9 +190,6 @@ const AdminLayout = ({ children }) => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => navigate('/admin/profile')}>
-                    Profile
-                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/admin/settings')}>
                     Settings
                   </DropdownMenuItem>

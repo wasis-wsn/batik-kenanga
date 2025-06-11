@@ -23,7 +23,7 @@ import AdminLayout from '@/components/admin/AdminLayout';
 
 // Admin Pages
 import AdminLoginPage from '@/pages/admin/AdminLoginPage';
-import AdminSetupPage from '@/pages/admin/AdminSetupPage';
+// import AdminSetupPage from '@/pages/admin/AdminSetupPage';
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
 import ProductsManagementPage from '@/pages/admin/ProductsManagementPage';
 import ProductFormPage from '@/pages/admin/ProductFormPage';
@@ -59,7 +59,7 @@ function App() {
           <Route path="/privacy-policy" element={<Layout><PrivacyPolicyPage /></Layout>} />
           <Route path="/terms" element={<Layout><TermsPage /></Layout>} />          {/* Admin Login and Setup Routes (Public) */}
           <Route path="/admin/login" element={<AdminLoginPage />} />
-          <Route path="/admin/setup" element={<AdminSetupPage />} />
+          {/* <Route path="/admin/setup" element={<AdminSetupPage />} /> */}
 
           {/* Protected Admin Routes */}
           <Route path="/admin/*" element={

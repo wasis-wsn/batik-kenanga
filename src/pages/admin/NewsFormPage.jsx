@@ -1,15 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save, Eye, Upload, X } from 'lucide-react';
+import { ArrowLeft, Save, Upload, X, Plus, Image as ImageIcon } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Textarea } from '../../components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
-import { Switch } from '../../components/ui/switch';
-import RichTextEditor from '../../components/ui/rich-text-editor';
 import { useToast } from '../../components/ui/use-toast';
-import { getNewsById, createNews, updateNews, uploadFile } from '../../services/supabase';
+import { 
+  getNewsById, 
+  createNews, 
+  updateNews,
+  uploadNewsMainImage,
+  uploadNewsRelatedImage
+} from '../../services/supabase';
+import RichTextEditor from '../../components/ui/rich-text-editor';
 
 const NewsFormPage = () => {
   const { id } = useParams();
@@ -19,10 +24,16 @@ const NewsFormPage = () => {
 
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [imageUploading, setImageUploading] = useState(false);
+  const [fileUploading, setFileUploading] = useState({
+    main: false,
+    related: []
+  });
+
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
+    category: '',
+    author: '',
     excerpt: '',
     content: '',
     image_url: '',
@@ -31,10 +42,18 @@ const NewsFormPage = () => {
     meta_title: '',
     meta_description: '',
     tags: [],
+    related_images: []
   });
 
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState('');
+  const [files, setFiles] = useState({
+    mainImage: null,
+    relatedImages: []
+  });
+
+  const [previews, setPreviews] = useState({
+    mainImage: '',
+    relatedImages: []
+  });
 
   useEffect(() => {
     if (isEdit) {
@@ -49,6 +68,8 @@ const NewsFormPage = () => {
       setFormData({
         title: article.title || '',
         slug: article.slug || '',
+        category: article.category || '',
+        author: article.author || '',
         excerpt: article.excerpt || '',
         content: article.content || '',
         image_url: article.image_url || '',
@@ -59,8 +80,13 @@ const NewsFormPage = () => {
         meta_title: article.meta_title || '',
         meta_description: article.meta_description || '',
         tags: article.tags || [],
+        related_images: article.related_images || []
       });
-      setImagePreview(article.image_url || '');
+      
+      setPreviews({
+        mainImage: article.image_url || '',
+        relatedImages: article.related_images || []
+      });
     } catch (error) {
       console.error('Error fetching news:', error);
       toast({
@@ -90,35 +116,110 @@ const NewsFormPage = () => {
     }));
   };
 
-  const handleImageChange = (e) => {
+  const handleMainImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onload = (e) => setImagePreview(e.target.result);
-      reader.readAsDataURL(file);
-    }
-  };
+    if (!file) return;
 
-  const uploadImage = async () => {
-    if (!imageFile) return formData.image_url;
-
-    try {
-      setImageUploading(true);
-      const fileName = `news/${Date.now()}-${imageFile.name}`;
-      const imageUrl = await uploadFile(imageFile, fileName);
-      return imageUrl;
-    } catch (error) {
-      console.error('Error uploading image:', error);
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
       toast({
         title: "Error",
-        description: "Failed to upload image",
+        description: "Please select an image file",
         variant: "destructive",
       });
-      return formData.image_url;
-    } finally {
-      setImageUploading(false);
+      return;
     }
+
+    // Validate file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Error",
+        description: "File size must be less than 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setFiles(prev => ({ ...prev, mainImage: file }));
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setPreviews(prev => ({ ...prev, mainImage: e.target.result }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRelatedImageChange = (index) => (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Error",
+        description: "Please select an image file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Error",
+        description: "File size must be less than 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newFiles = [...files.relatedImages];
+    newFiles[index] = file;
+    setFiles(prev => ({ ...prev, relatedImages: newFiles }));
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const newPreviews = [...previews.relatedImages];
+      newPreviews[index] = e.target.result;
+      setPreviews(prev => ({ ...prev, relatedImages: newPreviews }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const addRelatedImageSlot = () => {
+    setFiles(prev => ({
+      ...prev,
+      relatedImages: [...prev.relatedImages, null]
+    }));
+    setPreviews(prev => ({
+      ...prev,
+      relatedImages: [...prev.relatedImages, '']
+    }));
+    setFileUploading(prev => ({
+      ...prev,
+      related: [...prev.related, false]
+    }));
+  };
+
+  const removeRelatedImage = (index) => {
+    setFiles(prev => ({
+      ...prev,
+      relatedImages: prev.relatedImages.filter((_, i) => i !== index)
+    }));
+    setPreviews(prev => ({
+      ...prev,
+      relatedImages: prev.relatedImages.filter((_, i) => i !== index)
+    }));
+    setFormData(prev => ({
+      ...prev,
+      related_images: prev.related_images.filter((_, i) => i !== index)
+    }));
+  };
+
+  const removeMainImage = () => {
+    setFiles(prev => ({ ...prev, mainImage: null }));
+    setPreviews(prev => ({ ...prev, mainImage: '' }));
+    setFormData(prev => ({ ...prev, image_url: '' }));
   };
 
   const handleTagsChange = (e) => {
@@ -143,6 +244,22 @@ const NewsFormPage = () => {
       });
       return false;
     }
+    if (!formData.category.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Category is required",
+        variant: "destructive",
+      });
+      return false;
+    }
+    if (!formData.author.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Author is required",
+        variant: "destructive",
+      });
+      return false;
+    }
     if (formData.status === 'published' && !formData.published_at) {
       toast({
         title: "Validation Error",
@@ -154,6 +271,43 @@ const NewsFormPage = () => {
     return true;
   };
 
+  const uploadFiles = async (newsId) => {
+    const uploadedUrls = {
+      image_url: formData.image_url,
+      related_images: [...formData.related_images]
+    };
+
+    try {
+      // Upload main image
+      if (files.mainImage) {
+        setFileUploading(prev => ({ ...prev, main: true }));
+        uploadedUrls.image_url = await uploadNewsMainImage(newsId, files.mainImage);
+      }
+
+      // Upload related images
+      for (let i = 0; i < files.relatedImages.length; i++) {
+        if (files.relatedImages[i]) {
+          setFileUploading(prev => ({
+            ...prev,
+            related: prev.related.map((status, idx) => idx === i ? true : status)
+          }));
+          const url = await uploadNewsRelatedImage(newsId, files.relatedImages[i], i + 1);
+          uploadedUrls.related_images[i] = url;
+        }
+      }
+
+      return uploadedUrls;
+    } catch (error) {
+      console.error('File upload error:', error);
+      throw error;
+    } finally {
+      setFileUploading({
+        main: false,
+        related: files.relatedImages.map(() => false)
+      });
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -161,29 +315,43 @@ const NewsFormPage = () => {
 
     try {
       setSaving(true);
-
-      // Upload image if a new one was selected
-      const imageUrl = await uploadImage();
+      let newsId = id;
+      let uploadedUrls = {};
 
       const newsData = {
         ...formData,
-        image_url: imageUrl,
         published_at: formData.status === 'published' ? formData.published_at : null,
       };
 
       if (isEdit) {
+        // Update existing news
         await updateNews(id, newsData);
-        toast({
-          title: "Success",
-          description: "News article updated successfully",
-        });
+        
+        // Upload new files if any
+        uploadedUrls = await uploadFiles(id);
+        
+        // Update with new URLs
+        if (Object.keys(uploadedUrls).length > 0) {
+          await updateNews(id, uploadedUrls);
+        }
       } else {
-        await createNews(newsData);
-        toast({
-          title: "Success",
-          description: "News article created successfully",
-        });
+        // Create new news
+        const newNews = await createNews(newsData);
+        newsId = newNews.id;
+        
+        // Upload files
+        uploadedUrls = await uploadFiles(newsId);
+        
+        // Update with file URLs
+        if (Object.keys(uploadedUrls).length > 0) {
+          await updateNews(newsId, uploadedUrls);
+        }
       }
+
+      toast({
+        title: "Success",
+        description: `News article ${isEdit ? 'updated' : 'created'} successfully`,
+      });
 
       navigate('/admin/news');
     } catch (error) {
@@ -259,7 +427,35 @@ const NewsFormPage = () => {
                     placeholder="article-slug"
                     required
                   />
-                </div>                <div className="space-y-2">
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="category">Category *</Label>
+                    <Input
+                      id="category"
+                      name="category"
+                      value={formData.category}
+                      onChange={handleInputChange}
+                      placeholder="e.g., Fashion, Culture, News"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="author">Author *</Label>
+                    <Input
+                      id="author"
+                      name="author"
+                      value={formData.author}
+                      onChange={handleInputChange}
+                      placeholder="Author name"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="excerpt">Excerpt</Label>
                   <Textarea
                     id="excerpt"
@@ -269,7 +465,9 @@ const NewsFormPage = () => {
                     placeholder="Brief description of the article"
                     rows={3}
                   />
-                </div>                <div className="space-y-2">
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="content">Content *</Label>
                   <RichTextEditor
                     value={formData.content}
@@ -278,9 +476,73 @@ const NewsFormPage = () => {
                     height={400}
                   />
                   <p className="text-sm text-gray-500">
-                    You can use Markdown for formatting. Preview is available.
+                    You can use rich text formatting. Preview is available.
                   </p>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Related Images */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Related Images</CardTitle>
+                <p className="text-sm text-gray-600">Add multiple images to showcase in the article</p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  {previews.relatedImages.map((preview, index) => (
+                    <div key={index} className="space-y-2">
+                      <Label>Related Image {index + 1}</Label>
+                      {preview && (
+                        <div className="relative">
+                          <img
+                            src={preview}
+                            alt={`Related ${index + 1}`}
+                            className="w-full h-32 object-cover rounded-md border"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="absolute top-1 right-1"
+                            onClick={() => removeRelatedImage(index)}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      )}
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleRelatedImageChange(index)}
+                          className="hidden"
+                          id={`related-${index}`}
+                          disabled={fileUploading.related[index]}
+                        />
+                        <Label
+                          htmlFor={`related-${index}`}
+                          className="cursor-pointer flex flex-col items-center gap-2"
+                        >
+                          <ImageIcon className="h-8 w-8 text-gray-400" />
+                          <span className="text-sm text-gray-600">
+                            {fileUploading.related[index] ? 'Uploading...' : `Upload Related Image ${index + 1}`}
+                          </span>
+                        </Label>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={addRelatedImageSlot}
+                  className="w-full"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Related Image
+                </Button>
               </CardContent>
             </Card>
 
@@ -299,7 +561,9 @@ const NewsFormPage = () => {
                     onChange={handleInputChange}
                     placeholder="SEO title for search engines"
                   />
-                </div>                <div className="space-y-2">
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="meta_description">Meta Description</Label>
                   <Textarea
                     id="meta_description"
@@ -354,7 +618,7 @@ const NewsFormPage = () => {
                     <Input
                       id="published_at"
                       name="published_at"
-                      type="date"
+                      type="datetime-local"
                       value={formData.published_at}
                       onChange={handleInputChange}
                       required
@@ -369,42 +633,44 @@ const NewsFormPage = () => {
               <CardHeader>
                 <CardTitle>Featured Image</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {imagePreview && (
-                  <div className="relative">
+              <CardContent>
+                {previews.mainImage && (
+                  <div className="relative mb-4">
                     <img
-                      src={imagePreview}
-                      alt="Preview"
-                      className="w-full h-48 object-cover rounded-md"
+                      src={previews.mainImage}
+                      alt="Featured Image"
+                      className="w-full h-48 object-cover rounded-md border"
                     />
                     <Button
                       type="button"
                       variant="destructive"
                       size="sm"
-                      className="absolute top-2 right-2"
-                      onClick={() => {
-                        setImagePreview('');
-                        setImageFile(null);
-                        setFormData(prev => ({ ...prev, image_url: '' }));
-                      }}
+                      className="absolute top-1 right-1"
+                      onClick={removeMainImage}
                     >
-                      <X className="h-4 w-4" />
+                      <X className="h-3 w-3" />
                     </Button>
                   </div>
                 )}
                 
-                <div className="space-y-2">
-                  <Label htmlFor="image">Upload Image</Label>
-                  <Input
-                    id="image"
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors">
+                  <input
                     type="file"
                     accept="image/*"
-                    onChange={handleImageChange}
-                    disabled={imageUploading}
+                    onChange={handleMainImageChange}
+                    className="hidden"
+                    id="main-image"
+                    disabled={fileUploading.main}
                   />
-                  {imageUploading && (
-                    <p className="text-sm text-blue-600">Uploading image...</p>
-                  )}
+                  <Label
+                    htmlFor="main-image"
+                    className="cursor-pointer flex flex-col items-center gap-2"
+                  >
+                    <Upload className="h-8 w-8 text-gray-400" />
+                    <span className="text-sm text-gray-600">
+                      {fileUploading.main ? 'Uploading...' : 'Upload Featured Image'}
+                    </span>
+                  </Label>
                 </div>
               </CardContent>
             </Card>
@@ -421,7 +687,10 @@ const NewsFormPage = () => {
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={saving || imageUploading}>
+          <Button 
+            type="submit" 
+            disabled={saving || fileUploading.main || fileUploading.related.some(status => status)}
+          >
             {saving ? (
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
             ) : (

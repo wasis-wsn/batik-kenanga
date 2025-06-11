@@ -102,6 +102,9 @@ create table public.testimonials (
   logo_url text,
   colors jsonb default '[]',
   printing_method jsonb,
+  customer_email text default '',
+  customer_location text default '',  
+  is_featured boolean default false,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -149,11 +152,18 @@ create table public.media_library (
   filename text not null,
   original_name text not null,
   file_path text not null,
+  url text not null,
   file_size integer,
   mime_type text,
+  file_type text,
+  bucket_name text not null,
+  category text default 'general',
   alt_text text,
+  caption text,
+  tags text[] default '{}',
   created_by uuid references public.admin_users(id),
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
 -- Create settings table
@@ -203,6 +213,7 @@ create trigger update_news_updated_at before update on public.news for each row 
 create trigger update_testimonials_updated_at before update on public.testimonials for each row execute procedure update_updated_at_column();
 create trigger update_company_info_updated_at before update on public.company_info for each row execute procedure update_updated_at_column();
 create trigger update_admin_users_updated_at before update on public.admin_users for each row execute procedure update_updated_at_column();
+create trigger update_media_library_updated_at before update on public.media_library for each row execute procedure update_updated_at_column();
 create trigger update_settings_updated_at before update on public.settings for each row execute procedure update_updated_at_column();
 
 -- Create indexes for better performance
@@ -212,3 +223,6 @@ create index idx_news_published on public.news(published);
 create index idx_news_slug on public.news(slug);
 create index idx_categories_slug on public.categories(slug);
 create index idx_product_images_product_id on public.product_images(product_id);
+create index idx_media_library_bucket_name on public.media_library(bucket_name);
+create index idx_media_library_category on public.media_library(category);
+create index idx_media_library_file_type on public.media_library(file_type);

@@ -1,13 +1,43 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Calendar, ArrowLeft, ArrowRight, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { news } from '@/data/newsData';
+import { getAllNews, getNewsBySlug } from '../services/supabase';
 
 const NewsDetailPage = () => {
   const { slug } = useParams();
-  const currentNews = news.find(item => item.slug === slug);
+  const [currentNews, setCurrentNews] = useState(null);
+  const [allNews, setAllNews] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchNewsData();
+  }, [slug]);
+
+  const fetchNewsData = async () => {
+    try {
+      setLoading(true);
+      const [newsData, allNewsData] = await Promise.all([
+        getNewsBySlug(slug),
+        getAllNews({ status: 'published' })
+      ]);
+      setCurrentNews(newsData);
+      setAllNews(allNewsData);
+    } catch (error) {
+      console.error('Error fetching news:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
   
   if (!currentNews) {
     return (
@@ -20,20 +50,19 @@ const NewsDetailPage = () => {
     );
   }
 
-  const currentIndex = news.findIndex(item => item.slug === slug);
-  const prevNews = currentIndex > 0 ? news[currentIndex - 1] : null;
-  const nextNews = currentIndex < news.length - 1 ? news[currentIndex + 1] : null;
-  const recentNews = news
+  const currentIndex = allNews.findIndex(item => item.slug === slug);
+  const prevNews = currentIndex > 0 ? allNews[currentIndex - 1] : null;
+  const nextNews = currentIndex < allNews.length - 1 ? allNews[currentIndex + 1] : null;
+  const recentNews = allNews
     .filter(item => item.id !== currentNews.id)
-    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
     .slice(0, 3);
 
   return (
-    <div className="bg-background">
-      {/* Hero Section */}
+    <div className="bg-background">      {/* Hero Section */}
       <div className="relative h-[40vh] md:h-[50vh] overflow-hidden">
         <img
-          src={currentNews.imageUrl}
+          src={currentNews.image_url || '/images/batik1.jpg'}
           alt={currentNews.title}
           className="w-full h-full object-cover"
         />
@@ -62,10 +91,9 @@ const NewsDetailPage = () => {
               <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
                 <span className="bg-primary/10 text-primary px-3 py-1 rounded-full">
                   {currentNews.category}
-                </span>
-                <div className="flex items-center">
+                </span>                <div className="flex items-center">
                   <Calendar className="h-4 w-4 mr-1" />
-                  {new Date(currentNews.date).toLocaleDateString('id-ID', {
+                  {new Date(currentNews.created_at).toLocaleDateString('id-ID', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric'
@@ -79,13 +107,11 @@ const NewsDetailPage = () => {
 
               <div className="prose max-w-none mb-8"
                 dangerouslySetInnerHTML={{ __html: currentNews.content }}
-              />
-
-              {/* Image Gallery */}
-              {currentNews.relatedImages && (
+              />              {/* Image Gallery */}
+              {currentNews.related_images && currentNews.related_images.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-                  {currentNews.relatedImages.map((image, index) => (
-                    <div key={index} className="aspect-video rounded-lg overflow-hidden">
+                  {currentNews.related_images.map((image, index) => (
+                    <div key={`related-${index}`} className="aspect-video rounded-lg overflow-hidden">
                       <img
                         src={image}
                         alt={`Related image ${index + 1}`}
@@ -173,10 +199,9 @@ const NewsDetailPage = () => {
                         key={item.id}
                         to={`/news/${item.slug}`}
                         className="flex gap-4 group"
-                      >
-                        <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
+                      >                        <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
                           <img
-                            src={item.imageUrl}
+                            src={item.image_url || '/images/batik1.jpg'}
                             alt={item.title}
                             className="w-full h-full object-cover transition-transform group-hover:scale-105"
                           />
@@ -186,7 +211,7 @@ const NewsDetailPage = () => {
                             {item.title}
                           </h4>
                           <div className="text-sm text-muted-foreground mt-1">
-                            {new Date(item.date).toLocaleDateString('id-ID', {
+                            {new Date(item.created_at).toLocaleDateString('id-ID', {
                               year: 'numeric',
                               month: 'long',
                               day: 'numeric'

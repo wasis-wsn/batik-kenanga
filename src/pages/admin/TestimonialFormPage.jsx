@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save, Star, Upload, X } from 'lucide-react';
+import { ArrowLeft, Save, Star, Upload, X, Image, Building2, FileImage, Plus, Palette } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
@@ -8,7 +8,15 @@ import { Textarea } from '../../components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Switch } from '../../components/ui/switch';
 import { useToast } from '../../components/ui/use-toast';
-import { getTestimonialById, createTestimonial, updateTestimonial, uploadFile } from '../../services/supabase';
+import { 
+  getTestimonialById, 
+  createTestimonial, 
+  updateTestimonial, 
+  uploadTestimonialMainImage,
+  uploadTestimonialGalleryImage,
+  uploadTestimonialLogo,
+  uploadTestimonialPrintingMethod
+} from '../../services/supabase';
 
 const TestimonialFormPage = () => {
   const { id } = useParams();
@@ -18,20 +26,43 @@ const TestimonialFormPage = () => {
 
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [imageUploading, setImageUploading] = useState(false);
-  const [formData, setFormData] = useState({
+  const [fileUploading, setFileUploading] = useState({
+    main: false,
+    logo: false,
+    printing: false,
+    gallery: [false, false, false]
+  });  const [formData, setFormData] = useState({
     customer_name: '',
     customer_email: '',
     customer_location: '',
-    customer_image: '',
-    message: '',
+    category: '',
     product_name: '',
-    rating: 5,
-    is_featured: false,
+    year: new Date().getFullYear(),
+    image_url: '',
+    feedback: '',
+    image_gallery: [],
+    logo_url: '',
+    colors: [],
+    printing_method: {
+      image: '',
+      description: ''
+    },
+    is_featured: false
   });
 
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState('');
+  const [files, setFiles] = useState({
+    mainImage: null,
+    logo: null,
+    printing: null,
+    gallery: [null, null, null]
+  });
+
+  const [previews, setPreviews] = useState({
+    mainImage: '',
+    logo: '',
+    printing: '',
+    gallery: ['', '', '']
+  });
 
   useEffect(() => {
     if (isEdit) {
@@ -42,26 +73,58 @@ const TestimonialFormPage = () => {
   const fetchTestimonial = async () => {
     try {
       setLoading(true);
-      const testimonial = await getTestimonialById(id);
-      setFormData({
+      const testimonial = await getTestimonialById(id);      setFormData({
         customer_name: testimonial.customer_name || '',
         customer_email: testimonial.customer_email || '',
         customer_location: testimonial.customer_location || '',
-        customer_image: testimonial.customer_image || '',
-        message: testimonial.message || '',
+        image_url: testimonial.image_url || '',
+        feedback: testimonial.feedback || '',
         product_name: testimonial.product_name || '',
-        rating: testimonial.rating || 5,
+        category: testimonial.category || '',
+        year: testimonial.year || new Date().getFullYear(),
         is_featured: testimonial.is_featured || false,
+        image_gallery: testimonial.image_gallery || [],
+        logo_url: testimonial.logo_url || '',
+        colors: testimonial.colors || [],
+        printing_method: (() => {
+          const pm = testimonial.printing_method;
+          if (!pm) return { image: '', description: '' };
+          if (typeof pm === 'string') {
+            // Handle legacy data that is just a URL string
+            return { image: pm, description: '' };
+          }
+          if (typeof pm === 'object') {
+            return {
+              image: pm.image || '',
+              description: pm.description || ''
+            };
+          }
+          return { image: '', description: '' };
+        })()
+      });      // Set existing previews
+      setPreviews({
+        mainImage: testimonial.image_url || '',
+        logo: testimonial.logo_url || '',
+        printing: (() => {
+          const pm = testimonial.printing_method;
+          if (!pm) return '';
+          if (typeof pm === 'string') return pm;
+          if (typeof pm === 'object') return pm.image || '';
+          return '';
+        })(),
+        gallery: [
+          testimonial.image_gallery?.[0] || '',
+          testimonial.image_gallery?.[1] || '',
+          testimonial.image_gallery?.[2] || ''
+        ]
       });
-      setImagePreview(testimonial.customer_image || '');
     } catch (error) {
       console.error('Error fetching testimonial:', error);
       toast({
         title: "Error",
-        description: "Failed to fetch testimonial",
+        description: "Failed to fetch testimonial data",
         variant: "destructive",
       });
-      navigate('/admin/testimonials');
     } finally {
       setLoading(false);
     }
@@ -74,7 +137,6 @@ const TestimonialFormPage = () => {
       [name]: value
     }));
   };
-
   const handleSwitchChange = (name, checked) => {
     setFormData(prev => ({
       ...prev,
@@ -82,44 +144,68 @@ const TestimonialFormPage = () => {
     }));
   };
 
-  const handleRatingChange = (rating) => {
-    setFormData(prev => ({
-      ...prev,
-      rating
-    }));
-  };
-
-  const handleImageChange = (e) => {
+  const handleFileChange = (type, index = null) => (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setImageFile(file);
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Error",
+        description: "Please select an image file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Error",
+        description: "File size must be less than 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Set file and preview
+    if (type === 'gallery') {
+      const newFiles = [...files.gallery];
+      newFiles[index] = file;
+      setFiles(prev => ({ ...prev, gallery: newFiles }));
+
       const reader = new FileReader();
-      reader.onload = (e) => setImagePreview(e.target.result);
+      reader.onload = (e) => {
+        const newPreviews = [...previews.gallery];
+        newPreviews[index] = e.target.result;
+        setPreviews(prev => ({ ...prev, gallery: newPreviews }));
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setFiles(prev => ({ ...prev, [type]: file }));
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPreviews(prev => ({ ...prev, [type]: e.target.result }));
+      };
       reader.readAsDataURL(file);
     }
   };
 
-  const uploadImage = async () => {
-    if (!imageFile) return formData.customer_image;
+  const removeFile = (type, index = null) => {
+    if (type === 'gallery') {
+      const newFiles = [...files.gallery];
+      newFiles[index] = null;
+      setFiles(prev => ({ ...prev, gallery: newFiles }));
 
-    try {
-      setImageUploading(true);
-      const fileName = `testimonials/${Date.now()}-${imageFile.name}`;
-      const imageUrl = await uploadFile(imageFile, fileName);
-      return imageUrl;
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      toast({
-        title: "Error",
-        description: "Failed to upload image",
-        variant: "destructive",
-      });
-      return formData.customer_image;
-    } finally {
-      setImageUploading(false);
+      const newPreviews = [...previews.gallery];
+      newPreviews[index] = '';
+      setPreviews(prev => ({ ...prev, gallery: newPreviews }));
+    } else {
+      setFiles(prev => ({ ...prev, [type]: null }));
+      setPreviews(prev => ({ ...prev, [type]: '' }));
     }
   };
-
   const validateForm = () => {
     if (!formData.customer_name.trim()) {
       toast({
@@ -129,23 +215,76 @@ const TestimonialFormPage = () => {
       });
       return false;
     }
-    if (!formData.message.trim()) {
+
+    if (!formData.feedback.trim()) {
       toast({
         title: "Validation Error",
-        description: "Message is required",
+        description: "Testimonial feedback is required",
         variant: "destructive",
       });
       return false;
     }
-    if (formData.rating < 1 || formData.rating > 5) {
-      toast({
-        title: "Validation Error",
-        description: "Rating must be between 1 and 5",
-        variant: "destructive",
-      });
-      return false;
-    }
+
     return true;
+  };
+
+  const uploadFiles = async (testimonialId) => {    const uploadedUrls = {
+      image_url: formData.image_url,
+      image_gallery: [...formData.image_gallery],
+      logo_url: formData.logo_url,
+      printing_method: formData.printing_method,
+      colors: formData.colors
+    };
+
+    try {
+      // Upload main image
+      if (files.mainImage) {
+        setFileUploading(prev => ({ ...prev, main: true }));
+        uploadedUrls.image_url = await uploadTestimonialMainImage(testimonialId, files.mainImage);
+      }
+
+      // Upload logo
+      if (files.logo) {
+        setFileUploading(prev => ({ ...prev, logo: true }));
+        uploadedUrls.logo_url = await uploadTestimonialLogo(testimonialId, files.logo);
+      }      // Upload printing method image
+      if (files.printing) {
+        setFileUploading(prev => ({ ...prev, printing: true }));
+        const url = await uploadTestimonialPrintingMethod(testimonialId, files.printing);
+        uploadedUrls.printing_method = {
+          image: url,
+          description: formData.printing_method.description || ''
+        };
+      } else {
+        // Always ensure printing_method is an object structure
+        uploadedUrls.printing_method = {
+          image: formData.printing_method?.image || '',
+          description: formData.printing_method?.description || ''
+        };
+      }
+
+      // Upload gallery images
+      for (let i = 0; i < files.gallery.length; i++) {
+        if (files.gallery[i]) {
+          setFileUploading(prev => ({
+            ...prev,
+            gallery: prev.gallery.map((status, idx) => idx === i ? true : status)
+          }));
+          const url = await uploadTestimonialGalleryImage(testimonialId, files.gallery[i], i + 1);
+          uploadedUrls.image_gallery[i] = url;
+        }
+      }      return uploadedUrls;
+    } catch (error) {
+      console.error('File upload error:', error);
+      throw error;
+    } finally {
+      setFileUploading({
+        main: false,
+        logo: false,
+        printing: false,
+        gallery: [false, false, false]
+      });
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -155,28 +294,38 @@ const TestimonialFormPage = () => {
 
     try {
       setSaving(true);
-
-      // Upload image if a new one was selected
-      const imageUrl = await uploadImage();
-
-      const testimonialData = {
-        ...formData,
-        customer_image: imageUrl,
-      };
+      let testimonialId = id;
+      let uploadedUrls = {};
 
       if (isEdit) {
-        await updateTestimonial(id, testimonialData);
-        toast({
-          title: "Success",
-          description: "Testimonial updated successfully",
-        });
+        // Update existing testimonial
+        await updateTestimonial(id, formData);
+        
+        // Upload new files if any
+        uploadedUrls = await uploadFiles(id);
+        
+        // Update with new URLs
+        if (Object.keys(uploadedUrls).length > 0) {
+          await updateTestimonial(id, uploadedUrls);
+        }
       } else {
-        await createTestimonial(testimonialData);
-        toast({
-          title: "Success",
-          description: "Testimonial created successfully",
-        });
+        // Create new testimonial
+        const newTestimonial = await createTestimonial(formData);
+        testimonialId = newTestimonial.id;
+        
+        // Upload files
+        uploadedUrls = await uploadFiles(testimonialId);
+        
+        // Update with file URLs
+        if (Object.keys(uploadedUrls).length > 0) {
+          await updateTestimonial(testimonialId, uploadedUrls);
+        }
       }
+
+      toast({
+        title: "Success",
+        description: `Testimonial ${isEdit ? 'updated' : 'created'} successfully`,
+      });
 
       navigate('/admin/testimonials');
     } catch (error) {
@@ -191,30 +340,87 @@ const TestimonialFormPage = () => {
     }
   };
 
-  const renderStarRating = () => {
+
+  const renderFileUpload = (type, label, icon, index = null) => {
+    const preview = type === 'gallery' ? previews.gallery[index] : previews[type];
+    const isUploading = type === 'gallery' ? fileUploading.gallery[index] : fileUploading[type];
+
     return (
-      <div className="flex items-center gap-1">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <button
-            key={star}
-            type="button"
-            onClick={() => handleRatingChange(star)}
-            className="focus:outline-none"
-          >
-            <Star
-              className={`h-6 w-6 cursor-pointer transition-colors ${
-                star <= formData.rating 
-                  ? 'text-yellow-400 fill-current' 
-                  : 'text-gray-300 hover:text-yellow-200'
-              }`}
+      <div className="space-y-2">
+        <Label>{label}</Label>
+        {preview && (
+          <div className="relative">
+            <img
+              src={preview}
+              alt={label}
+              className="w-full h-32 object-cover rounded-md border"
             />
-          </button>
-        ))}
-        <span className="ml-2 text-sm text-gray-600">
-          ({formData.rating} star{formData.rating !== 1 ? 's' : ''})
-        </span>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              className="absolute top-1 right-1"
+              onClick={() => removeFile(type, index)}
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+        )}
+        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange(type, index)}
+            className="hidden"
+            id={`${type}-${index || 'input'}`}
+            disabled={isUploading}
+          />
+          <Label
+            htmlFor={`${type}-${index || 'input'}`}
+            className="cursor-pointer flex flex-col items-center gap-2"
+          >
+            {icon}
+            <span className="text-sm text-gray-600">
+              {isUploading ? 'Uploading...' : `Upload ${label}`}
+            </span>
+          </Label>
+        </div>
       </div>
     );
+  };
+  const addColor = () => {
+    if (formData.colors.length < 3) {
+      setFormData(prev => ({
+        ...prev,
+        colors: [...prev.colors, { hex: '#000000', name: 'Warna Baru' }]
+      }));
+    }
+  };
+
+  const updateColor = (index, field, value) => {
+    const newColors = [...formData.colors];
+    newColors[index] = { ...newColors[index], [field]: value };
+    setFormData(prev => ({
+      ...prev,
+      colors: newColors
+    }));
+  };
+
+  const removeColor = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      colors: prev.colors.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handlePrintingMethodDescriptionChange = (e) => {
+    setFormData(prev => ({
+      ...prev,
+      printing_method: {
+        ...prev.printing_method,
+        description: e.target.value
+      }
+    }));
   };
 
   if (loading) {
@@ -301,19 +507,17 @@ const TestimonialFormPage = () => {
                 <CardTitle>Testimonial Details</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">                <div className="space-y-2">
-                  <Label htmlFor="message">Testimonial Message *</Label>
+                  <Label htmlFor="feedback">Testimonial Feedback *</Label>
                   <Textarea
-                    id="message"
-                    name="message"
-                    value={formData.message}
+                    id="feedback"
+                    name="feedback"
+                    value={formData.feedback}
                     onChange={handleInputChange}
-                    placeholder="Enter the customer's testimonial message..."
+                    placeholder="Enter the customer's testimonial feedback..."
                     rows={6}
                     required
                   />
-                </div>
-
-                <div className="space-y-2">
+                </div><div className="space-y-2">
                   <Label htmlFor="product_name">Product Name</Label>
                   <Input
                     id="product_name"
@@ -324,9 +528,53 @@ const TestimonialFormPage = () => {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Rating *</Label>
-                  {renderStarRating()}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="category">Category</Label>
+                    <select
+                      id="category"
+                      name="category"
+                      value={formData.category}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Select category</option>
+                      <option value="corporate">Corporate</option>
+                      <option value="custom">Custom</option>
+                      <option value="community">Community</option>
+                      <option value="retail">Retail</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="year">Year</Label>
+                    <Input
+                      id="year"
+                      name="year"
+                      type="number"
+                      value={formData.year}
+                      onChange={handleInputChange}
+                      min="2020"
+                      max={new Date().getFullYear()}
+                      placeholder="Year of testimonial"
+                    />
+                  </div>
+                </div>              </CardContent>
+            </Card>
+
+            {/* Image Gallery */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Image Gallery</CardTitle>
+                <p className="text-sm text-gray-600">Upload up to 3 images</p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {[0, 1, 2].map((index) => (
+                    <div key={index}>
+                      {renderFileUpload('gallery', `Image ${index + 1}`, <Image className="h-8 w-8 text-gray-400" />, index)}
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -361,43 +609,92 @@ const TestimonialFormPage = () => {
               <CardHeader>
                 <CardTitle>Customer Photo</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {imagePreview && (
-                  <div className="relative">
-                    <img
-                      src={imagePreview}
-                      alt="Customer"
-                      className="w-full h-48 object-cover rounded-md"
-                    />
+              <CardContent>
+                {renderFileUpload('mainImage', 'Customer Photo', <Upload className="h-8 w-8 text-gray-400" />)}
+              </CardContent>
+            </Card>
+
+            {/* Company Logo */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Company Logo</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {renderFileUpload('logo', 'Company Logo', <Building2 className="h-8 w-8 text-gray-400" />)}
+              </CardContent>
+            </Card>
+
+            {/* Printing Method */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Printing Method</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {renderFileUpload('printing', 'Technique Image', <FileImage className="h-8 w-8 text-gray-400" />)}
+              </CardContent>
+            </Card>            {/* Colors */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Colors</CardTitle>
+                <p className="text-sm text-gray-600">Select up to 3 colors</p>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {formData.colors.map((colorObj, index) => (
+                    <div key={index} className="flex items-center gap-3 p-3 border rounded-lg">
+                      <input
+                        type="color"
+                        value={colorObj.hex}
+                        onChange={(e) => updateColor(index, 'hex', e.target.value)}
+                        className="w-12 h-12 p-0 border-0 rounded-md cursor-pointer"
+                      />
+                      <div className="flex-1">
+                        <Input
+                          placeholder="Nama warna"
+                          value={colorObj.name}
+                          onChange={(e) => updateColor(index, 'name', e.target.value)}
+                          className="text-sm"
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => removeColor(index)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+
+                  {formData.colors.length < 3 && (
                     <Button
                       type="button"
-                      variant="destructive"
+                      variant="outline"
                       size="sm"
-                      className="absolute top-2 right-2"
-                      onClick={() => {
-                        setImagePreview('');
-                        setImageFile(null);
-                        setFormData(prev => ({ ...prev, customer_image: '' }));
-                      }}
+                      onClick={addColor}
+                      className="w-full flex items-center gap-2"
                     >
-                      <X className="h-4 w-4" />
+                      <Plus className="h-4 w-4" />
+                      Tambah Warna
                     </Button>
-                  </div>
-                )}
-                
-                <div className="space-y-2">
-                  <Label htmlFor="image">Upload Photo</Label>
-                  <Input
-                    id="image"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    disabled={imageUploading}
-                  />
-                  {imageUploading && (
-                    <p className="text-sm text-blue-600">Uploading image...</p>
                   )}
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Printing Method Description */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Printing Method Description</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Textarea
+                  value={formData.printing_method.description}
+                  onChange={handlePrintingMethodDescriptionChange}
+                  placeholder="Enter a description for the printing method..."
+                  rows={3}
+                />
               </CardContent>
             </Card>
           </div>
@@ -413,7 +710,12 @@ const TestimonialFormPage = () => {
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={saving || imageUploading}>
+          <Button 
+            type="submit" 
+            disabled={saving || Object.values(fileUploading).some(status => 
+              Array.isArray(status) ? status.some(s => s) : status
+            )}
+          >
             {saving ? (
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
             ) : (
