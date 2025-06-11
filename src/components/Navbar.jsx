@@ -44,13 +44,13 @@ const Navbar = () => {
       document.body.style.overflow = 'auto';
     };
   }, [isMenuOpen]);
-
   const navLinks = [
     { name: 'Beranda', path: '/' },
     { name: 'Tentang Kami', path: '/about' },
     { name: 'Produk', path: '/products' },
     { name: 'Pelanggan Kami', path: '/costumers' },
     { name: 'Berita', path: '/news' },
+    { name: 'Galeri', path: '/gallery' },
   ];
 
   return (

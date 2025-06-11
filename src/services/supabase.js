@@ -591,8 +591,110 @@ const supabaseHelpers = {
       .from('media_library')
       .delete()
       .eq('file_path', path);
-    
-    if (dbError) throw dbError;
+      if (dbError) throw dbError;
+  },
+
+  // Gallery
+  async getGalleryFiles() {
+    try {
+      const { data, error } = await supabase.storage
+        .from('documents')
+        .list('galeri', {
+          limit: 1000,
+          sortBy: { column: 'created_at', order: 'desc' }
+        });
+
+      if (error) throw error;
+
+      // Get public URLs for each file
+      const filesWithUrls = data
+        .filter(file => file.name !== '.emptyFolderPlaceholder')
+        .map(file => {
+          const { data: urlData } = supabase.storage
+            .from('documents')
+            .getPublicUrl(`galeri/${file.name}`);
+
+          return {
+            filename: file.name,
+            original_name: file.metadata?.original_name || file.name,
+            public_url: urlData.publicUrl,
+            created_at: file.created_at,
+            updated_at: file.updated_at,
+            size: file.metadata?.size,
+            type: file.metadata?.mimetype || 'image/jpeg',
+            category: file.metadata?.category || 'Umum',
+            description: file.metadata?.description || ''
+          };
+        });
+
+      return filesWithUrls;
+    } catch (error) {
+      console.error('Error fetching gallery files:', error);
+      return [];
+    }
+  },
+
+  async uploadGalleryFile(file, metadata = {}) {
+    try {
+      const fileName = `${Date.now()}-${file.name}`;
+      const filePath = `galeri/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(filePath, file, {
+          contentType: file.type,
+          metadata: {
+            original_name: file.name,
+            size: file.size,
+            mimetype: file.type,
+            category: metadata.category || 'Umum',
+            description: metadata.description || ''
+          }
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from('documents')
+        .getPublicUrl(filePath);
+
+      return {
+        filename: fileName,
+        original_name: file.name,
+        public_url: urlData.publicUrl,
+        file_path: filePath,
+        category: metadata.category || 'Umum',
+        description: metadata.description || ''
+      };
+    } catch (error) {
+      console.error('Error uploading gallery file:', error);
+      throw error;
+    }
+  },
+
+  async deleteGalleryFile(fileName) {
+    try {
+      const { error } = await supabase.storage
+        .from('documents')
+        .remove([`galeri/${fileName}`]);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error deleting gallery file:', error);
+      throw error;
+    }
+  },
+
+  async updateGalleryFile(fileName, metadata) {
+    try {      // Note: Supabase doesn't support updating metadata directly
+      // This would require downloading, updating metadata, and re-uploading
+      // For now, we'll just return success
+      return true;
+    } catch (error) {
+      console.error('Error updating gallery file:', error);
+      throw error;
+    }
   },
 
   // Settings
@@ -658,13 +760,18 @@ export const {
   // Company Info
   getCompanyInfo,
   updateCompanyInfo,
-
   // Media Library
   getAllMediaFiles,
   addToMediaLibrary,
   deleteFromMediaLibrary,
   uploadFile,
   deleteFile,
+
+  // Gallery
+  getGalleryFiles,
+  uploadGalleryFile,
+  deleteGalleryFile,
+  updateGalleryFile,
 
   // Settings
   getSettings,

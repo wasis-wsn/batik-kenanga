@@ -397,11 +397,9 @@ const CompanyInfoPage = () => {  const { toast } = useToast();
                   const fileName = member.imageUrl.split('/').pop();
                   const file = new File([blob], fileName, { type: blob.type });
                   
-                  // Upload to new sequential location
-                  const newImageUrl = await uploadTeamMemberImage(file, newIndex, member.imageUrl);
+                  // Upload to new sequential location                const newImageUrl = await uploadTeamMemberImage(file, newIndex, member.imageUrl);
                   updatedMember.imageUrl = newImageUrl;
                   
-                  console.log(`Moved team member ${member.name} image from index ${currentIndex} to ${newIndex}`);
                 } catch (error) {
                   console.warn('Failed to reorganize image for member:', member.name, error);
                   // Keep original URL if reorganization fails

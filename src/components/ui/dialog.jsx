@@ -2,6 +2,13 @@ import React from 'react';
 import { X } from 'lucide-react';
 import { Button } from './button';
 
+export const DialogTrigger = ({ children, asChild, ...props }) => {
+  if (asChild) {
+    return React.cloneElement(children, props);
+  }
+  return <div {...props}>{children}</div>;
+};
+
 export const Dialog = ({ open, onOpenChange, children }) => {
   if (!open) return null;
 

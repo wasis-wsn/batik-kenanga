@@ -132,24 +132,19 @@ const SettingsPage = () => {  const { toast } = useToast();
   const togglePasswordVisibility = (field) => {
     setShowPasswords(prev => ({ ...prev, [field]: !prev[field] }));
   };
-
   const saveGeneralSettings = async () => {
     try {
       setSaving(true);
-      console.log('Saving general settings...', formData);
       
       // Save general settings to settings table
-      console.log('Updating settings table...');
       await updateMultipleSettings({
         site_name: formData.site_name,
         site_description: formData.site_description,
         site_url: formData.site_url,        maintenance_mode: formData.maintenance_mode,
         business_hours: formData.business_hours,
       });
-      console.log('Settings table updated successfully');
 
       // Save contact info to company_info table
-      console.log('Updating company_info table...');
       const contactInfoUpdate = {
         contact_info: {
           address: formData.contact_address,
@@ -162,9 +157,7 @@ const SettingsPage = () => {  const { toast } = useToast();
           whatsapp: formData.contact_whatsapp,
         }
       };
-      console.log('Contact info update data:', contactInfoUpdate);
       await updateCompanyInfo(contactInfoUpdate);
-      console.log('Company info updated successfully');
 
       toast({
         title: "Berhasil",

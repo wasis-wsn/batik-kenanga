@@ -232,10 +232,8 @@ export const productService = {
       const uploadResult = await storageService.uploadFile(
         STORAGE_BUCKETS.PRODUCTS, 
         file, 
-        folderPath
-      );
+        folderPath        );
       
-      console.log('Product image uploaded:', uploadResult.publicUrl);
       return uploadResult.publicUrl;
     } catch (error) {
       console.error('Error uploading product image:', error);
@@ -274,10 +272,8 @@ export const productService = {
       if (files && files.length > 0) {
         for (const file of files) {
           await storageService.deleteFile(STORAGE_BUCKETS.PRODUCTS, file.fullPath);
-        }
-      }
+        }      }
       
-      console.log(`Deleted product folder: ${folderPath}`);
     } catch (error) {
       console.error('Error deleting product folder:', error);
       throw error;
@@ -381,13 +377,10 @@ export const productService = {
   },
   // Process stamping tools with image uploads
   async processStampingTools(stampingTools, productId) {
-    try {
-      console.log('Processing stamping tools:', stampingTools);
-      const processedTools = [];
+    try {      const processedTools = [];
       
       for (let i = 0; i < stampingTools.length; i++) {
         const tool = stampingTools[i];
-        console.log(`Processing tool ${i}:`, tool);
         
         let toolData = {
           name: tool.name,
@@ -399,10 +392,8 @@ export const productService = {
         // If there's an image file, upload it
         if (tool.imageFile) {
           try {
-            console.log('Uploading image for tool:', tool.name);
             const imageUrl = await this.uploadStampingToolImage(tool.imageFile, productId, i);
             toolData.imageUrl = imageUrl;
-            console.log('Image uploaded successfully:', imageUrl);
           } catch (error) {
             console.error('Error uploading stamping tool image:', error);
             // Continue without image if upload fails
@@ -412,10 +403,8 @@ export const productService = {
           toolData.imageUrl = tool.imageUrl;
         }
 
-        processedTools.push(toolData);
-      }
-
-      console.log('Processed tools:', processedTools);
+        processedTools.push(toolData);      }
+      
       return processedTools;
     } catch (error) {
       console.error('Error processing stamping tools:', error);

@@ -11,6 +11,7 @@ import ContactPage from '@/pages/ContactPage';
 import CostumerPage from '@/pages/CostumerPage';
 import NewsPage from '@/pages/NewsPage';
 import NewsDetailPage from '@/pages/NewsDetailPage';
+import GalleryPage from '@/pages/GalleryPage';
 import PrivacyPolicyPage from '@/pages/PrivacyPolicyPage';
 import TermsPage from '@/pages/TermsPage';
 import { CartProvider } from '@/contexts/CartContext';
@@ -52,12 +53,12 @@ function App() {
           <Route path="/products" element={<Layout><ProductsPage /></Layout>} />
           <Route path="/products/:id" element={<Layout><ProductDetailPage /></Layout>} />
           <Route path="/cart" element={<Layout><CartPage /></Layout>} />
-          <Route path="/contact" element={<Layout><ContactPage /></Layout>} />
-          <Route path="/costumers" element={<Layout><CostumerPage /></Layout>} />
+          <Route path="/contact" element={<Layout><ContactPage /></Layout>} />          <Route path="/costumers" element={<Layout><CostumerPage /></Layout>} />
           <Route path="/news" element={<Layout><NewsPage /></Layout>} />
           <Route path="/news/:slug" element={<Layout><NewsDetailPage /></Layout>} />
+          <Route path="/gallery" element={<Layout><GalleryPage /></Layout>} />
           <Route path="/privacy-policy" element={<Layout><PrivacyPolicyPage /></Layout>} />
-          <Route path="/terms" element={<Layout><TermsPage /></Layout>} />          {/* Admin Login and Setup Routes (Public) */}
+          <Route path="/terms" element={<Layout><TermsPage /></Layout>} />{/* Admin Login and Setup Routes (Public) */}
           <Route path="/admin/login" element={<AdminLoginPage />} />
           {/* <Route path="/admin/setup" element={<AdminSetupPage />} /> */}
 

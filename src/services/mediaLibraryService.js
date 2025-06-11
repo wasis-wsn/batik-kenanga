@@ -22,32 +22,24 @@ export class MediaLibraryService {
       throw error;
     }
   }
-
   // Sync storage files with database
   async syncStorageWithDatabase() {
     try {
-      console.log('Starting storage sync with database...');
-      
       // Get all files from storage buckets
       const storageFiles = await this.getAllStorageFiles();
-      console.log(`Found ${storageFiles.length} files in storage`);
       
       // Get all files from database
       const dbFiles = await this.getAllMediaFiles();
-      console.log(`Found ${dbFiles.length} files in database`);
       
       // Find files in storage but not in database
       const storageFilePaths = storageFiles.map(f => f.file_path);
       const dbFilePaths = dbFiles.map(f => f.file_path);
-      
-      const missingInDb = storageFiles.filter(f => !dbFilePaths.includes(f.file_path));
-      console.log(`Found ${missingInDb.length} files missing in database`);
+        const missingInDb = storageFiles.filter(f => !dbFilePaths.includes(f.file_path));
       
       // Add missing files to database
       for (const file of missingInDb) {
         try {
           await this.addFileToDatabase(file);
-          console.log(`Added file to database: ${file.filename}`);
         } catch (error) {
           console.error(`Error adding file ${file.filename} to database:`, error);
         }
@@ -55,7 +47,6 @@ export class MediaLibraryService {
       
       // Find files in database but not in storage (optional cleanup)
       const missingInStorage = dbFiles.filter(f => !storageFilePaths.includes(f.file_path));
-      console.log(`Found ${missingInStorage.length} files in database but missing in storage`);
       
       return {
         storageFiles: storageFiles.length,
@@ -154,10 +145,17 @@ export class MediaLibraryService {
       throw error;
     }
   }
-
   // Upload file to storage and add to database
-  async uploadFile(file, category = 'general', bucket = null) {
+  async uploadFile(file, bucket = null, metadata = {}) {
     try {
+      // Extract metadata with defaults
+      const {
+        category = 'general',
+        alt_text = null,
+        caption = null,
+        tags = []
+      } = metadata;
+
       // Determine bucket based on file type if not specified
       const targetBucket = bucket || this.getBucketForFileType(this.getFileTypeFromName(file.name));
       
@@ -178,7 +176,10 @@ export class MediaLibraryService {
         mime_type: file.type,
         file_type: this.getFileTypeFromName(file.name),
         bucket_name: targetBucket,
-        category: category
+        category: category,
+        alt_text: alt_text,
+        caption: caption,
+        tags: Array.isArray(tags) ? tags : []
       };
       
       const dbEntry = await this.addFileToDatabase(fileData);

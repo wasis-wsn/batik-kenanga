@@ -57,10 +57,8 @@ class CompanyService {
           timestamp: Date.now()
         });
 
-        return mergedData;
-      } else {
+        return mergedData;      } else {
         // Fallback to static data if no Supabase data
-        console.log('No company data found in Supabase, using static data');
         return staticCompanyInfo;
       }
     } catch (error) {
@@ -258,10 +256,7 @@ class CompanyService {
           social_media: {},
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
-        };
-
-        await companyInfoService.createCompanyInfo(initialData);
-        console.log('Company data initialized in Supabase');
+        };        await companyInfoService.createCompanyInfo(initialData);
         
         // Clear cache to force refresh
         this.clearCache();

@@ -32,9 +32,7 @@ export const companyInfoService = {  async getCompanyInfo() {
         console.error('Update error:', error);
         throw error;
       }
-      
-      if (data && data.length > 0) {
-        console.log('Update successful:', data[0]);
+        if (data && data.length > 0) {
         return data[0];
       } else {
         // If no existing record, create one
@@ -64,8 +62,9 @@ export const companyInfoService = {  async getCompanyInfo() {
     } catch (error) {
       console.error('Error creating company info:', error);
       throw error;
-    }
-  },  // Upload company logo (replaces existing logo)
+    }  },
+
+  // Upload company logo (replaces existing logo)
   async uploadLogo(file) {
     try {
       // First, get current logo URL to delete old file
@@ -84,7 +83,6 @@ export const companyInfoService = {  async getCompanyInfo() {
             const filePath = urlParts[1];
             try {
               await storageService.deleteFile(STORAGE_BUCKETS.COMPANY, filePath);
-              console.log('Old logo deleted:', filePath);
             } catch (deleteError) {
               console.warn('Could not delete old logo:', deleteError);
               // Continue with upload even if delete fails
@@ -100,13 +98,13 @@ export const companyInfoService = {  async getCompanyInfo() {
         `logos/${Date.now()}-${file.name}`
       );
       
-      console.log('New logo uploaded:', uploadResult.publicUrl);
       return uploadResult.publicUrl;
     } catch (error) {
       console.error('Error uploading logo:', error);
       throw error;
-    }
-  },  // Upload hero image (replaces existing hero image)
+    }  },
+
+  // Upload hero image (replaces existing hero image)
   async uploadHeroImage(file) {
     try {
       // First, get current hero image URL to delete old file
@@ -125,7 +123,7 @@ export const companyInfoService = {  async getCompanyInfo() {
             const filePath = urlParts[1];
             try {
               await storageService.deleteFile(STORAGE_BUCKETS.COMPANY, filePath);
-              console.log('Old hero image deleted:', filePath);
+
             } catch (deleteError) {
               console.warn('Could not delete old hero image:', deleteError);
               // Continue with upload even if delete fails
@@ -141,13 +139,13 @@ export const companyInfoService = {  async getCompanyInfo() {
         `hero-images/${Date.now()}-${file.name}`
       );
       
-      console.log('New hero image uploaded:', uploadResult.publicUrl);
+
       return uploadResult.publicUrl;
     } catch (error) {
       console.error('Error uploading hero image:', error);
       throw error;
-    }
-  },
+    }  },
+
   // Upload home page image (replaces existing home page image)
   async uploadHomePageImage(file) {
     try {
@@ -167,7 +165,7 @@ export const companyInfoService = {  async getCompanyInfo() {
             const filePath = urlParts[1];
             try {
               await storageService.deleteFile(STORAGE_BUCKETS.COMPANY, filePath);
-              console.log('Old home page image deleted:', filePath);
+
             } catch (deleteError) {
               console.warn('Could not delete old home page image:', deleteError);
               // Continue with upload even if delete fails
@@ -179,17 +177,15 @@ export const companyInfoService = {  async getCompanyInfo() {
       // Upload new home page image
       const uploadResult = await storageService.uploadFile(
         STORAGE_BUCKETS.COMPANY, 
-        file, 
-        `home-page-images/${Date.now()}-${file.name}`
+        file,        `home-page-images/${Date.now()}-${file.name}`
       );
       
-      console.log('New home page image uploaded:', uploadResult.publicUrl);
       return uploadResult.publicUrl;
     } catch (error) {
       console.error('Error uploading home page image:', error);
       throw error;
-    }
-  },
+    }  },
+
   // Upload profile image (replaces existing profile image)
   async uploadProfileImage(file) {
     try {
@@ -209,7 +205,7 @@ export const companyInfoService = {  async getCompanyInfo() {
             const filePath = urlParts[1];
             try {
               await storageService.deleteFile(STORAGE_BUCKETS.COMPANY, filePath);
-              console.log('Old profile image deleted:', filePath);
+
             } catch (deleteError) {
               console.warn('Could not delete old profile image:', deleteError);
               // Continue with upload even if delete fails
@@ -221,28 +217,27 @@ export const companyInfoService = {  async getCompanyInfo() {
       // Upload new profile image
       const uploadResult = await storageService.uploadFile(
         STORAGE_BUCKETS.COMPANY, 
-        file, 
-        `profile-images/${Date.now()}-${file.name}`
+        file,        `profile-images/${Date.now()}-${file.name}`
       );
       
-      console.log('New profile image uploaded:', uploadResult.publicUrl);
       return uploadResult.publicUrl;
     } catch (error) {
       console.error('Error uploading profile image:', error);
       throw error;
-    }
-  },
+    }  },
+
   // Note: Hero videos are now served statically from public/videos/
   // Upload team member image with organized folder structure
   async uploadTeamMemberImage(file, memberIndex, existingImageUrl = null) {
-    try {      // Delete existing image if exists
+    try {
+      // Delete existing image if exists
       if (existingImageUrl?.includes('/storage/v1/object/public/company/team/')) {
         const urlParts = existingImageUrl.split('/storage/v1/object/public/company/');
         if (urlParts.length > 1) {
           const filePath = urlParts[1];
           try {
             await storageService.deleteFile(STORAGE_BUCKETS.COMPANY, filePath);
-            console.log('Old team member image deleted:', filePath);
+
           } catch (deleteError) {
             console.warn('Could not delete old team member image:', deleteError);
             // Continue with upload even if delete fails
@@ -262,7 +257,7 @@ export const companyInfoService = {  async getCompanyInfo() {
         folderPath
       );
       
-      console.log('New team member image uploaded:', uploadResult.publicUrl);
+
       return uploadResult.publicUrl;
     } catch (error) {
       console.error('Error uploading team member image:', error);
@@ -272,8 +267,7 @@ export const companyInfoService = {  async getCompanyInfo() {
 
   // Delete team member folder and all its contents
   async deleteTeamMemberImages(memberIndex) {
-    try {
-      // List all files in the member's folder
+    try {      // List all files in the member's folder
       const files = await storageService.listFiles(STORAGE_BUCKETS.COMPANY, `team/${memberIndex}`);
       
       // Delete all files in the folder
@@ -281,13 +275,11 @@ export const companyInfoService = {  async getCompanyInfo() {
         await storageService.deleteFile(STORAGE_BUCKETS.COMPANY, file.fullPath);
       }
       
-      console.log(`Team member ${memberIndex} folder cleaned up`);
       return true;
     } catch (error) {
       console.error('Error deleting team member images:', error);
       throw error;
-    }
-  },
+    }  },
 
   // Upload company images
   async uploadCompanyImage(file, category = 'general') {
@@ -452,7 +444,7 @@ export const settingsService = {
     }
   },  async updateMultipleSettings(settings) {
     try {
-      console.log('Starting updateMultipleSettings with:', settings);
+
       
       // Process each setting individually to avoid conflicts
       const results = [];
@@ -495,7 +487,7 @@ export const settingsService = {
         }
       }
       
-      console.log('All settings processed successfully:', results);
+
       return results;
     } catch (error) {
       console.error('Error updating multiple settings:', error);

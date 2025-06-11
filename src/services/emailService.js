@@ -167,25 +167,12 @@ Received on: ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}
   /**
    * Simulate email sending (for development without backend)
    * In production, this would be replaced with actual API call
-   */
-  async simulateEmailSend(emailContent, smtpConfig) {
+   */  async simulateEmailSend(emailContent, smtpConfig) {
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // Log email details for debugging
-    console.log('📧 Email would be sent with:', {
-      smtp: {
-        host: smtpConfig.host,
-        port: smtpConfig.port,
-        user: smtpConfig.auth.user
-      },
-      email: {
-        to: emailContent.to,
-        from: emailContent.from,
-        subject: emailContent.subject
-      }
-    });
-
+    // Email simulation - in production this would actually send
+    
     // Simulate successful send
     return {
       messageId: `sim_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,

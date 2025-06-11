@@ -29,15 +29,12 @@ export class SupabaseStorageService {
       
       const missingBuckets = requiredBuckets.filter(bucket => 
         !availableBuckets.includes(bucket)
-      );
-
-      if (missingBuckets.length > 0) {
+      );      if (missingBuckets.length > 0) {
         console.warn('Missing storage buckets:', missingBuckets);
-        console.log('Please create these buckets in Supabase Dashboard or run storage-policies.sql');
+        console.warn('Please create these buckets in Supabase Dashboard or run storage-policies.sql');
         return false;
       }
 
-      console.log('All required storage buckets are available');
       return true;
     } catch (error) {
       console.error('Error checking bucket availability:', error);
@@ -298,18 +295,11 @@ export class SupabaseStorageService {
       throw error;
     }
   }
-
   // Debug function to troubleshoot bucket access
   async debugBucketAccess() {
-    console.log('🔍 Debugging bucket access...');
-    
     try {
       // Test 1: Check if we can connect to Supabase
       const { data: buckets, error } = await this.storage.listBuckets();
-      
-      console.log('📊 Bucket listing result:');
-      console.log('- Error:', error);
-      console.log('- Data:', buckets);
       
       if (error) {
         console.error('❌ Error details:', {
@@ -321,23 +311,18 @@ export class SupabaseStorageService {
         
         // Check if it's an authentication issue
         if (error.message.includes('Invalid API key') || error.message.includes('JWT')) {
-          console.log('🔑 This looks like an authentication issue. Check your SUPABASE_ANON_KEY');
+          console.warn('🔑 This looks like an authentication issue. Check your SUPABASE_ANON_KEY');
         }
         
         // Check if it's an RLS issue
         if (error.message.includes('row-level security') || error.message.includes('policy')) {
-          console.log('🔒 This looks like a Row Level Security policy issue');
+          console.warn('🔒 This looks like a Row Level Security policy issue');
         }
         
         return false;
       }
       
       if (buckets && Array.isArray(buckets)) {
-        console.log(`✅ Successfully retrieved ${buckets.length} buckets:`);
-        buckets.forEach((bucket, index) => {
-          console.log(`${index + 1}. ${bucket.name} (Public: ${bucket.public})`);
-        });
-        
         // Check which required buckets are missing
         const requiredBuckets = Object.values(STORAGE_BUCKETS);
         const availableBuckets = buckets.map(bucket => bucket.name);
@@ -346,17 +331,12 @@ export class SupabaseStorageService {
         );
         
         if (missingBuckets.length > 0) {
-          console.log('❌ Missing buckets:', missingBuckets);
-          console.log('📝 Required buckets:', requiredBuckets);
-          console.log('📋 Available buckets:', availableBuckets);
-        } else {
-          console.log('✅ All required buckets are available!');
+          console.warn('❌ Missing buckets:', missingBuckets);
         }
         
         return missingBuckets.length === 0;
       }
       
-      console.log('⚠️ Unexpected response format');
       return false;
       
     } catch (error) {

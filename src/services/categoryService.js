@@ -153,10 +153,8 @@ export const categoryService = {
       const uploadResult = await storageService.uploadFile(
         STORAGE_BUCKETS.IMAGES, 
         file, 
-        folderPath
-      );
+        folderPath        );
       
-      console.log('Category image uploaded:', uploadResult.publicUrl);
       return uploadResult.publicUrl;
     } catch (error) {
       console.error('Error uploading category image:', error);
@@ -190,9 +188,7 @@ export const categoryService = {
           await storageService.deleteFile(STORAGE_BUCKETS.IMAGES, filePath);
         }
       }
-      
-      console.log(`Deleted category folder: ${folderPath}`);
-    } catch (error) {
+      } catch (error) {
       console.error('Error deleting category folder:', error);
       throw error;
     }
