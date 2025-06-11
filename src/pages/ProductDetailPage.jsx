@@ -5,47 +5,66 @@ import { ArrowLeft, Minus, Plus, ShoppingCart, Star, Truck, Shield, RefreshCw } 
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useCart } from '@/contexts/CartContext';
-import { products as allProducts } from '@/data/productData';
+import { productService } from '@/services/productService';
 import { formatCurrency } from '@/lib/utils';
 import ProductCard from '@/components/ProductCard';
+import { useToast } from '@/components/ui/use-toast';
 
 const ProductDetailPage = () => {
   const { id } = useParams();
   const { addToCart } = useCart();
+  const { toast } = useToast();
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [allProducts, setAllProducts] = useState([]);
 
   useEffect(() => {
-    // Simulate loading
-    setIsLoading(true);
-    
-    // Find the product by id
-    const foundProduct = allProducts.find(p => p.id === parseInt(id));
-    
-    if (foundProduct) {
-      setProduct(foundProduct);
+    loadProductData();
+  }, [id]);
+
+  const loadProductData = async () => {
+    try {
+      setIsLoading(true);
+      
+      // Load the specific product and all products for related products
+      const [productData, allProductsData] = await Promise.all([
+        productService.getProductById(id),
+        productService.getAllProducts()
+      ]);
+      
+      setProduct(productData);
+      setAllProducts(allProductsData);
       
       // Find related products (same category, excluding current product)
-      const related = allProducts
-        .filter(p => p.category === foundProduct.category && p.id !== foundProduct.id)
-        .slice(0, 3);
+      if (productData) {
+        const related = allProductsData
+          .filter(p => 
+            p.category_id === productData.category_id && 
+            p.id !== productData.id
+          )
+          .slice(0, 3);
+        
+        setRelatedProducts(related);
+      }
       
-      setRelatedProducts(related);
-    }
-    
-    // Simulate API call delay
-    setTimeout(() => {
+      // Reset quantity when product changes
+      setQuantity(1);
+      
+      // Scroll to top when product changes
+      window.scrollTo(0, 0);
+    } catch (error) {
+      console.error('Error loading product:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load product details',
+        variant: 'destructive',
+      });
+    } finally {
       setIsLoading(false);
-    }, 500);
-    
-    // Reset quantity when product changes
-    setQuantity(1);
-    
-    // Scroll to top when product changes
-    window.scrollTo(0, 0);
-  }, [id]);
+    }
+  };
 
   const handleQuantityChange = (amount) => {
     const newQuantity = quantity + amount;
@@ -108,10 +127,9 @@ const ProductDetailPage = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5 }}
               className="relative"
-            >
-              <div className="rounded-lg overflow-hidden shadow-lg">
+            >              <div className="rounded-lg overflow-hidden shadow-lg">
                 <img 
-                  src={product.imageUrl} 
+                  src={product.image_url || '/images/batik1.jpg'} 
                   alt={product.name} 
                   className="w-full h-auto object-cover"
                 />
@@ -196,11 +214,10 @@ const ProductDetailPage = () => {
                   <span className="text-sm">Pengembalian Mudah</span>
                 </div>
               </div>
-              
-              {/* Categories */}
+                {/* Categories */}
               <div className="border-t border-border pt-4">
                 <p className="text-sm text-muted-foreground">
-                  Kategori: <Link to={`/products?category=${product.category}`} className="text-primary hover:underline">{product.category.replace('-', ' ')}</Link>
+                  Kategori: <Link to={`/products?category=${product.categories?.slug || product.category_id}`} className="text-primary hover:underline">{product.categories?.name || 'Category'}</Link>
                 </p>
               </div>
             </motion.div>
@@ -225,23 +242,22 @@ const ProductDetailPage = () => {
               <p className="text-muted-foreground mb-6">
                 {product.description}
               </p>
-              
-              {/* Detail Images */}
-              {product.details.images && product.details.images.length > 0 && (
+                {/* Detail Images */}
+              {product.product_images && product.product_images.length > 0 && (
                 <div className="space-y-6">
                   <h4 className="font-medium text-lg mb-4">Detail Motif</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {product.details.images.map((image, index) => (
+                    {product.product_images.map((image, index) => (
                       <div key={index} className="space-y-2">
                         <div className="aspect-video rounded-lg overflow-hidden">
                           <img
                             src={image.url}
-                            alt={image.caption}
+                            alt={image.caption || `Product image ${index + 1}`}
                             className="w-full h-full object-cover"
                           />
                         </div>
                         <p className="text-sm text-muted-foreground text-center">
-                          {image.caption}
+                          {image.caption || `Product image ${index + 1}`}
                         </p>
                       </div>
                     ))}
@@ -253,27 +269,26 @@ const ProductDetailPage = () => {
             {/* Specifications Tab */}
             <TabsContent value="specifications" className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="text-xl font-semibold mb-4">Spesifikasi</h3>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-4">                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="bg-secondary/50 p-4 rounded-md">
                     <p className="text-sm text-muted-foreground mb-1">Bahan</p>
-                    <p className="font-medium">{product.details.material}</p>
+                    <p className="font-medium">{product.material || 'Katun Primisima'}</p>
                   </div>
                   <div className="bg-secondary/50 p-4 rounded-md">
                     <p className="text-sm text-muted-foreground mb-1">Ukuran</p>
-                    <p className="font-medium">{product.details.size}</p>
+                    <p className="font-medium">{product.size || '2.4m x 1.15m'}</p>
                   </div>
                   <div className="bg-secondary/50 p-4 rounded-md">
                     <p className="text-sm text-muted-foreground mb-1">Teknik</p>
-                    <p className="font-medium">{product.details.technique}</p>
+                    <p className="font-medium">{product.technique || 'Batik Tulis'}</p>
                   </div>
                   <div className="bg-secondary/50 p-4 rounded-md">
                     <p className="text-sm text-muted-foreground mb-1">Asal</p>
-                    <p className="font-medium">{product.details.origin}</p>
+                    <p className="font-medium">{product.origin || 'Solo, Indonesia'}</p>
                   </div>
                   <div className="bg-secondary/50 p-4 rounded-md">
                     <p className="text-sm text-muted-foreground mb-1">Pewarnaan</p>
-                    <p className="font-medium">{product.details.coloring}</p>
+                    <p className="font-medium">{product.coloring || 'Pewarna alam tradisional'}</p>
                   </div>
                 </div>
               </div>
@@ -282,19 +297,17 @@ const ProductDetailPage = () => {
             {/* Process Tab */}
             <TabsContent value="process" className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="text-xl font-semibold mb-4">Proses Pembuatan</h3>
-              
-              {product.details.stampingTools && product.details.stampingTools.length > 0 ? (
+                {product.stamping_tools && product.stamping_tools.length > 0 ? (
                 <div className="space-y-6">
-                  <h4 className="font-medium text-lg mb-4">Alat Cap yang Digunakan</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {product.details.stampingTools.map((tool) => (
+                  <h4 className="font-medium text-lg mb-4">Alat Cap yang Digunakan</h4>                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {product.stamping_tools.map((tool, index) => (
                       <div 
-                        key={tool.id}
+                        key={index}
                         className="flex space-x-4 bg-secondary/30 p-4 rounded-lg"
                       >
                         <div className="w-24 h-24 flex-shrink-0">
                           <img
-                            src={tool.image}
+                            src={tool.imageUrl || tool.url || '/images/cap_kenanga1.jpg'}
                             alt={tool.name}
                             className="w-full h-full object-cover rounded-md"
                           />
@@ -328,10 +341,9 @@ const ProductDetailPage = () => {
             </TabsContent>
 
             {/* Care Tab */}
-            <TabsContent value="care" className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-xl font-semibold mb-4">Petunjuk Perawatan</h3>
+            <TabsContent value="care" className="bg-white p-6 rounded-lg shadow-md">              <h3 className="text-xl font-semibold mb-4">Petunjuk Perawatan</h3>
               <p className="text-muted-foreground mb-4">
-                {product.details.careInstructions}
+                {product.care_instructions || 'Cuci dengan tangan menggunakan air dingin dan deterjen lembut. Jangan menggunakan pemutih. Jemur di tempat teduh.'}
               </p>
               <div className="space-y-2 mt-4">
                 <div className="flex items-start">

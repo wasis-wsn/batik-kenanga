@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Star, ChevronLeft, ChevronRight, Users, ShoppingBag, Award, Factory } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { testimonials } from '@/data/testimonialData';
+import { getAllTestimonials, getFeaturedTestimonials } from '../services/supabase';
 
 const TestimonialGrid = ({ testimonials }) => {
   return (
@@ -17,26 +17,43 @@ const TestimonialGrid = ({ testimonials }) => {
         >
           <div className="aspect-video">
             <img
-              src={testimonial.image}
-              alt={testimonial.productName}
+              src={testimonial.image_url || '/images/batik1.jpg'}
+              alt={testimonial.product_name}
               className="w-full h-full object-cover"
             />
           </div>
           <div className="p-6">
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-montserrat font-semibold">
-                {testimonial.customerName}
+                {testimonial.customer_name}
               </h3>
               <span className="text-sm text-muted-foreground">
                 {testimonial.year}
               </span>
             </div>
             <p className="text-sm text-primary mb-3">
-              {testimonial.productName}
+              {testimonial.product_name}
             </p>
             <p className="text-sm text-muted-foreground line-clamp-3">
               {testimonial.feedback}
             </p>
+            
+            {/* Display colors if available */}
+            {testimonial.colors && testimonial.colors.length > 0 && (
+              <div className="flex items-center gap-2 mt-3">
+                <span className="text-xs text-gray-500">Colors:</span>
+                <div className="flex gap-1">
+                  {testimonial.colors.map((color, index) => (
+                    <div
+                      key={index}
+                      className="w-4 h-4 rounded-full border border-gray-300"
+                      style={{ backgroundColor: color.hex }}
+                      title={color.name}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </motion.div>
       ))}
@@ -46,16 +63,40 @@ const TestimonialGrid = ({ testimonials }) => {
 
 const CostumerPage = () => {
   const [activeTestimonial, setActiveTestimonial] = useState(0);
+  const [testimonials, setTestimonials] = useState([]);
+  const [featuredTestimonials, setFeaturedTestimonials] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeCategory, setActiveCategory] = useState('all');
+
+  useEffect(() => {
+    fetchTestimonials();
+  }, []);
+
+  const fetchTestimonials = async () => {
+    try {
+      setLoading(true);
+      const [allTestimonials, featured] = await Promise.all([
+        getAllTestimonials(),
+        getFeaturedTestimonials()
+      ]);
+      setTestimonials(allTestimonials);
+      setFeaturedTestimonials(featured);
+    } catch (error) {
+      console.error('Error fetching testimonials:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const nextTestimonial = () => {
     setActiveTestimonial((prev) => 
-      prev === testimonials.length - 1 ? 0 : prev + 1
+      prev === featuredTestimonials.length - 1 ? 0 : prev + 1
     );
   };
 
   const prevTestimonial = () => {
     setActiveTestimonial((prev) => 
-      prev === 0 ? testimonials.length - 1 : prev - 1
+      prev === 0 ? featuredTestimonials.length - 1 : prev - 1
     );
   };
 
@@ -65,6 +106,17 @@ const CostumerPage = () => {
     }
     return testimonials.filter(item => item.category === category);
   };
+
+  // Get unique categories from testimonials
+  const categories = ['all', ...new Set(testimonials.map(t => t.category).filter(Boolean))];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-background">
@@ -225,103 +277,125 @@ const CostumerPage = () => {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
               className="grid md:grid-cols-2 gap-12 items-center"
-            >
-              {/* Image Section */}
+            >              {/* Image Section */}
               <div className="relative">
                 <div className="aspect-square rounded-lg overflow-hidden shadow-xl">
                   <img
-                    src={testimonials[activeTestimonial].image}
-                    alt={testimonials[activeTestimonial].productName}
+                    src={featuredTestimonials.length > 0 ? 
+                      (featuredTestimonials[activeTestimonial].image_url || '/images/batik1.jpg') : 
+                      '/images/batik1.jpg'
+                    }
+                    alt={featuredTestimonials.length > 0 ? 
+                      featuredTestimonials[activeTestimonial].product_name : 
+                      'Loading...'
+                    }
                     className="w-full h-full object-cover"
                   />
                 </div>
                 <div className="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-sm p-4 rounded-lg">
                   <h3 className="font-montserrat font-semibold text-lg">
-                    {testimonials[activeTestimonial].productName}
+                    {featuredTestimonials.length > 0 ? 
+                      featuredTestimonials[activeTestimonial].product_name : 
+                      'Loading...'
+                    }
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    {testimonials[activeTestimonial].customerName} • {testimonials[activeTestimonial].year}
+                    {featuredTestimonials.length > 0 ? 
+                      `${featuredTestimonials[activeTestimonial].customer_name} • ${featuredTestimonials[activeTestimonial].year}` :
+                      'Loading...'
+                    }
                   </p>
                 </div>
               </div>
 
-              {/* Testimonial Content */}
-              <div className="bg-card p-8 rounded-lg shadow-lg">
-                <blockquote className="text-lg text-muted-foreground mb-6">
-                  "{testimonials[activeTestimonial].feedback}"
-                </blockquote>
+              {/* Testimonial Content */}            <div className="bg-card p-8 rounded-lg shadow-lg">
+                {featuredTestimonials.length > 0 ? (
+                  <>
+                    <blockquote className="text-lg text-muted-foreground mb-6">
+                      "{featuredTestimonials[activeTestimonial].feedback}"
+                    </blockquote>
 
-                {/* Color Information Section */}
-                <div className="mb-6">
-                  <h4 className="font-montserrat font-medium text-foreground mb-3">
-                    Logo & Warna Yang Digunakan
-                  </h4>
-                  <div className="flex items-start gap-8">
-                    {/* Logo Section */}
-                    {testimonials[activeTestimonial].logo && (
-                      <div className="w-32 flex-shrink-0">
-                        <div className="aspect-square bg-secondary/30 rounded-lg p-4 flex items-center justify-center">
+                    {/* Color Information Section */}
+                    <div className="mb-6">
+                      <h4 className="font-montserrat font-medium text-foreground mb-3">
+                        Logo & Warna Yang Digunakan
+                      </h4>
+                      <div className="flex items-start gap-8">
+                        {/* Logo Section */}
+                        {featuredTestimonials[activeTestimonial].logo_url && (
+                          <div className="w-32 flex-shrink-0">
+                            <div className="aspect-square bg-secondary/30 rounded-lg p-4 flex items-center justify-center">
+                              <img
+                                src={featuredTestimonials[activeTestimonial].logo_url}
+                                alt={`Logo ${featuredTestimonials[activeTestimonial].customer_name}`}
+                                className="max-w-full max-h-full object-contain"
+                              />
+                            </div>
+                            <p className="text-xs text-muted-foreground text-center mt-2">
+                              Logo Original
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Colors Section */}
+                        <div className="flex-1">
+                          <div className="flex items-center gap-4">
+                            {featuredTestimonials[activeTestimonial].colors?.map((color, index) => (
+                              <div key={index} className="flex flex-col items-center">
+                                <div
+                                  className="w-8 h-8 rounded-full border border-border"
+                                  style={{ backgroundColor: color.hex }}
+                                />
+                                <span className="text-xs text-muted-foreground mt-1">
+                                  {color.name}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-3">
+                            *Warna yang digunakan dalam produk batik
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-muted-foreground">No featured testimonials available</p>
+                )}                {/* Printing Information Section */}
+                {featuredTestimonials.length > 0 && (
+                  <>
+                    <div className="flex gap-6 items-start">
+                      {featuredTestimonials[activeTestimonial].printing_method?.image && (
+                        <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
                           <img
-                            src={testimonials[activeTestimonial].logo}
-                            alt={`Logo ${testimonials[activeTestimonial].customerName}`}
-                            className="max-w-full max-h-full object-contain"
+                            src={featuredTestimonials[activeTestimonial].printing_method.image}
+                            alt="Teknik Cetak"
+                            className="w-full h-full object-cover"
                           />
                         </div>
-                        <p className="text-xs text-muted-foreground text-center mt-2">
-                          Logo Original
+                      )}
+                      <div>
+                        <h4 className="font-montserrat font-medium text-foreground mb-2">
+                          Teknik Pencetakan
+                        </h4>
+                        <p className="text-sm text-muted-foreground">
+                          {featuredTestimonials[activeTestimonial].printing_method?.description || 'Teknik batik tradisional dengan kualitas premium'}
                         </p>
                       </div>
-                    )}
+                    </div>
 
-                    {/* Colors Section */}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-4">
-                        {testimonials[activeTestimonial].colors?.map((color, index) => (
-                          <div key={index} className="flex flex-col items-center">
-                            <div
-                              className="w-8 h-8 rounded-full border border-border"
-                              style={{ backgroundColor: color.hex }}
-                            />
-                            <span className="text-xs text-muted-foreground mt-1">
-                              {color.name}
-                            </span>
+                    {/* Result Batik Section */}
+                    {featuredTestimonials[activeTestimonial].image_gallery && featuredTestimonials[activeTestimonial].image_gallery.length > 0 && (
+                      <div className="grid grid-cols-3 gap-4 mt-6">
+                        {featuredTestimonials[activeTestimonial].image_gallery.map((img, index) => (
+                          <div key={index} className="aspect-square rounded-md overflow-hidden">
+                            <img src={img} alt="Gallery" className="w-full h-full object-cover" />
                           </div>
                         ))}
                       </div>
-                      <p className="text-xs text-muted-foreground mt-3">
-                        *Warna yang digunakan dalam produk batik
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Printing Information Section */}
-                <div className="flex gap-6 items-start">
-                  <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
-                    <img
-                      src={testimonials[activeTestimonial].printingMethod?.image}
-                      alt="Teknik Cetak"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div>
-                    <h4 className="font-montserrat font-medium text-foreground mb-2">
-                      Teknik Pencetakan
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      {testimonials[activeTestimonial].printingMethod?.description}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Result Batik Section */}
-                <div className="grid grid-cols-3 gap-4 mt-6">
-                  {testimonials[activeTestimonial].imageGallery.map((img, index) => (
-                    <div key={index} className="aspect-square rounded-md overflow-hidden">
-                      <img src={img} alt="Gallery" className="w-full h-full object-cover" />
-                    </div>
-                  ))}
-                </div>
+                    )}
+                  </>
+                )}
               </div>
             </motion.div>
 
@@ -352,31 +426,25 @@ const CostumerPage = () => {
             <p className="text-lg text-muted-foreground">
               Apa kata mereka tentang Batik Kenanga
             </p>
-          </div>
-
-          <Tabs defaultValue="all" className="w-full">
+          </div>          <Tabs value={activeCategory} onValueChange={setActiveCategory} className="w-full">
             <TabsList className="w-full max-w-md mx-auto grid grid-cols-4 mb-8">
-              <TabsTrigger value="all">Semua</TabsTrigger>
-              <TabsTrigger value="corporate">Korporat</TabsTrigger>
-              <TabsTrigger value="custom">Custom</TabsTrigger>
-              <TabsTrigger value="retail">Retail</TabsTrigger>
+              {categories.slice(0, 4).map((category) => (
+                <TabsTrigger key={category} value={category}>
+                  {category === 'all' ? 'Semua' : 
+                   category === 'corporate' ? 'Korporat' :
+                   category === 'custom' ? 'Custom' :
+                   category === 'retail' ? 'Retail' :
+                   category === 'community' ? 'Komunitas' :
+                   category.charAt(0).toUpperCase() + category.slice(1)}
+                </TabsTrigger>
+              ))}
             </TabsList>
 
-            <TabsContent value="all">
-              <TestimonialGrid testimonials={filterTestimonials('all')} />
-            </TabsContent>
-
-            <TabsContent value="corporate">
-              <TestimonialGrid testimonials={filterTestimonials('corporate')} />
-            </TabsContent>
-
-            <TabsContent value="custom">
-              <TestimonialGrid testimonials={filterTestimonials('custom')} />
-            </TabsContent>
-
-            <TabsContent value="retail">
-              <TestimonialGrid testimonials={filterTestimonials('retail')} />
-            </TabsContent>
+            {categories.map((category) => (
+              <TabsContent key={category} value={category}>
+                <TestimonialGrid testimonials={filterTestimonials(category)} />
+              </TabsContent>
+            ))}
           </Tabs>
         </div>
       </section>

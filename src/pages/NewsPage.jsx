@@ -1,16 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Calendar, ChevronRight, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { news } from '@/data/newsData';
+import { getAllNews } from '../services/supabase';
 
 const NewsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
+  const [news, setNews] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const categories = [...new Set(news.map(item => item.category))];
+  useEffect(() => {
+    fetchNews();
+  }, []);
+
+  const fetchNews = async () => {
+    try {
+      setLoading(true);
+      const data = await getAllNews({ status: 'published' });
+      setNews(data);
+    } catch (error) {
+      console.error('Error fetching news:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const categories = [...new Set(news.map(item => item.category).filter(Boolean))];
 
   const filteredNews = news.filter(item => {
     const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -18,6 +36,14 @@ const NewsPage = () => {
     const matchesCategory = activeCategory === 'all' || item.category === activeCategory;
     return matchesSearch && matchesCategory;
   });
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-background">
@@ -101,10 +127,9 @@ const NewsPage = () => {
                     viewport={{ once: true }}
                     className="bg-card rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
                   >
-                    <Link to={`/news/${item.slug}`} className="flex flex-col md:flex-row">
-                      <div className="md:w-1/3">
+                    <Link to={`/news/${item.slug}`} className="flex flex-col md:flex-row">                      <div className="md:w-1/3">
                         <img
-                          src={item.imageUrl}
+                          src={item.image_url || '/images/batik1.jpg'}
                           alt={item.title}
                           className="w-full h-full object-cover aspect-video md:aspect-square"
                         />
@@ -116,7 +141,7 @@ const NewsPage = () => {
                           </span>
                           <div className="flex items-center">
                             <Calendar className="h-4 w-4 mr-1" />
-                            {new Date(item.date).toLocaleDateString('id-ID', {
+                            {new Date(item.created_at).toLocaleDateString('id-ID', {
                               year: 'numeric',
                               month: 'long',
                               day: 'numeric'

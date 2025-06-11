@@ -153,19 +153,16 @@ export const products = [
           url: "/images/batikdetail3.jpg",
           caption: "Proses pencantingan"
         }
-      ],
-      stampingTools: [
+      ],      stampingTools: [
         {
-          id: "cap1",
           name: "Cap Kenanga Klasik",
-          image: "/images/cap_kenanga1.jpg",
+          url: "/images/cap_kenanga1.jpg",
           description: "Cap tembaga motif kenanga ukuran 20x20cm",
           usageArea: "Motif utama"
         },
         {
-          id: "cap2",
           name: "Cap Parang Rusak",
-          image: "/images/cap_kenanga2.jpg",
+          url: "/images/cap_kenanga2.jpg",
           description: "Cap tembaga motif parang ukuran 15x25cm",
           usageArea: "Motif pendukung"
         }

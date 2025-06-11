@@ -5,16 +5,18 @@ import { Menu, X, ShoppingBag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
-import { companyInfo } from '@/data/companyData';
+import { useCompanyInfo } from '@/hooks/useCompanyInfo';
+import { companyInfo as fallbackCompanyInfo } from '@/data/companyData';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   const { cartItems } = useCart();
+  const { companyInfo } = useCompanyInfo();
 
   const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
-  const logoUrl = companyInfo.logoUrlLight;
+  const logoUrl = companyInfo?.logoUrlLight || fallbackCompanyInfo.logoUrlLight;
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -42,21 +44,27 @@ const Navbar = () => {
       document.body.style.overflow = 'auto';
     };
   }, [isMenuOpen]);
-
   const navLinks = [
     { name: 'Beranda', path: '/' },
     { name: 'Tentang Kami', path: '/about' },
     { name: 'Produk', path: '/products' },
     { name: 'Pelanggan Kami', path: '/costumers' },
     { name: 'Berita', path: '/news' },
+    { name: 'Galeri', path: '/gallery' },
   ];
 
   return (
     <header className={`sticky top-0 z-50 w-full transition-all duration-300 ${isScrolled ? 'bg-card/90 backdrop-blur-md shadow-sm' : 'bg-transparent'}`}>
-      <div className="container mx-auto px-4 py-3">
-        <div className="flex items-center justify-between">
+      <div className="container mx-auto px-4 py-3">        <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center">
-            <img src={logoUrl} alt="Batik Kenanga Logo" className="h-10 md:h-12 mr-2" />
+            <img 
+              src={logoUrl} 
+              alt={`${companyInfo?.name || 'Batik Kenanga'} Logo`} 
+              className="h-10 md:h-12 mr-2" 
+              onError={(e) => {
+                e.target.src = fallbackCompanyInfo.logoUrlLight;
+              }}
+            />
           </Link>
 
           <nav className="hidden md:flex items-center space-x-6">

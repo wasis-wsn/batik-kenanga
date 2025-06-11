@@ -125,4 +125,30 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+  
+  /* Masonry Layout Styles */
+  .masonry-grid {
+    columns: 1;
+    column-gap: 1.5rem;
+  }
+  
+  .masonry-item {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 1.5rem;
+    display: inline-block;
+    width: 100%;
+  }
+  
+  /* Prevent column breaks in masonry items */
+  .masonry-item img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+  /* Ensure smooth transitions for masonry layout */
+  .masonry-grid .motion-div {
+    break-inside: avoid;
+  }
 }
