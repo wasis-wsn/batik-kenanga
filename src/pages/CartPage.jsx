@@ -38,7 +38,7 @@ const CartPage = () => {
   const handleWhatsAppCheckout = () => {
     setIsCheckingOut(true);
     const message = generateWhatsAppMessage();
-    const phoneNumber = "6285640263053";
+    const phoneNumber = "6289668212349";
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
     
     // Open WhatsApp in new tab
