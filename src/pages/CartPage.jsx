@@ -114,7 +114,7 @@ const CartPage = () => {
               <div className="p-6 border-b border-border">
                 <h2 className="text-xl font-semibold">Produk ({cartItems.length})</h2>
                 <p className="text-sm text-muted-foreground mt-2">
-                  <span className="font-medium">Catatan:</span> Ukuran yang ditampilkan hanyalah ukuran yang tersedia untuk produk. Harga tetap dihitung per meter.
+                  <span className="font-medium">Catatan:</span> Ukuran yang ditampilkan hanyalah ukuran yang tersedia untuk produk. Harga tetap dihitung per 10 meter.
                 </p>
               </div>
               
