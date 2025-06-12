@@ -22,9 +22,9 @@ const HeroSection = () => {
           src="/videos/video_batik_kenanga.mp4"
           className="absolute inset-0 w-full h-full object-cover opacity-50"
         />
-      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent"></div>
-      <div className="relative z-10 container mx-auto px-4 py-20 md:py-32">        <motion.h1
-          className="text-4xl md:text-6xl lg:text-7xl font-montserrat font-bold leading-tight text-primary mb-6"
+      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent"></div>      <div className="relative z-10 container mx-auto px-4 py-16 md:py-20 lg:py-32">
+        <motion.h1
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-montserrat font-bold leading-tight text-primary mb-4 md:mb-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
@@ -32,7 +32,7 @@ const HeroSection = () => {
           {companyInfo.name}
         </motion.h1>
         <motion.p
-          className="font-playfair-display text-2xl md:text-3xl text-foreground mb-10 max-w-3xl mx-auto"
+          className="font-playfair-display text-lg sm:text-xl md:text-2xl lg:text-3xl text-foreground mb-8 md:mb-10 max-w-3xl mx-auto"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
@@ -43,12 +43,12 @@ const HeroSection = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.6 }}
-          className="flex flex-col sm:flex-row gap-4 justify-center"
+          className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center"
         >
-          <Button asChild size="lg" className="font-montserrat font-semibold text-lg bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3">
+          <Button asChild size="lg" className="font-montserrat font-semibold text-base sm:text-lg bg-primary hover:bg-primary/90 text-primary-foreground px-6 sm:px-8 py-3 w-full sm:w-auto">
             <Link to="/products">Lihat Koleksi</Link>
           </Button>
-          <Button asChild variant="outline" size="lg" className="font-montserrat font-semibold text-lg text-primary border-primary hover:bg-primary/10 hover:text-primary px-8 py-3">
+          <Button asChild variant="outline" size="lg" className="font-montserrat font-semibold text-base sm:text-lg text-primary border-primary hover:bg-primary/10 hover:text-primary px-6 sm:px-8 py-3 w-full sm:w-auto">
             <Link to="/about">Tentang Kami</Link>
           </Button>
         </motion.div>
@@ -163,52 +163,50 @@ const FeaturedProductsSection = () => {
 
   return (
     <section className="py-16 lg:py-24 bg-secondary/30">
-      <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row justify-between items-center mb-12">
+      <div className="container mx-auto px-4">        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 md:mb-12 gap-4">
           <div className="text-center md:text-left">
-            <h2 className="text-3xl lg:text-4xl font-montserrat font-bold text-primary">Produk Unggulan</h2>
-            <p className="font-lora text-lg text-muted-foreground mt-2">Koleksi batik terbaik dari Batik Kenanga</p>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-montserrat font-bold text-primary">Produk Unggulan</h2>
+            <p className="font-lora text-base sm:text-lg text-muted-foreground mt-2">Koleksi batik terbaik dari Batik Kenanga</p>
           </div>
-          <Button asChild variant="link" className="mt-4 md:mt-0 text-primary font-montserrat font-semibold hover:text-primary/80">
-            <Link to="/products" className="flex items-center text-lg">
-              Lihat Semua Koleksi <ArrowRight className="ml-2 h-5 w-5" />
+          <Button asChild variant="link" className="text-primary font-montserrat font-semibold hover:text-primary/80 text-center md:text-left">
+            <Link to="/products" className="flex items-center text-base sm:text-lg">
+              Lihat Semua Koleksi <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
             </Link>
           </Button>
         </div>
         <div className="relative group">
           <div 
             ref={scrollRef}
-            className="flex overflow-x-auto snap-x snap-mandatory scrollbar-none mx-4 px-4 scroll-smooth"
+            className="flex overflow-x-auto snap-x snap-mandatory scrollbar-none scroll-smooth pb-4"
             style={{ 
               msOverflowStyle: 'none',
               scrollbarWidth: 'none'
             }}
           >
-            <div className="flex gap-10 my-4">
+            <div className="flex gap-4 sm:gap-6 lg:gap-8 px-4 sm:px-0">
               {featuredProducts.map(product => (
                 <div 
                   key={product.id} 
-                  className="w-[calc(100%/3-1rem)] flex-shrink-0 snap-start"
+                  className="w-72 sm:w-80 md:w-96 flex-shrink-0 snap-start"
                 >
                   <ProductCard product={product} />
                 </div>
               ))}
             </div>
-          </div>
-          
-          {/* Navigation Buttons */}
+          </div>          
+          {/* Navigation Buttons - Hidden on mobile */}
           <button 
             onClick={() => scroll('left')}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-12 h-12 rounded-full bg-background/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center hover:bg-background/70"
+            className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-background/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-center justify-center hover:bg-background/90 shadow-lg hidden sm:flex"
           >
-            <ChevronLeft className="w-6 h-6 text-primary" />
+            <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
           </button>
           
           <button 
             onClick={() => scroll('right')}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-12 h-12 rounded-full bg-background/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center hover:bg-background/70"
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-background/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-center justify-center hover:bg-background/90 shadow-lg hidden sm:flex"
           >
-            <ChevronRight className="w-6 h-6 text-primary" />
+            <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
           </button>
         </div>
       </div>
@@ -220,11 +218,10 @@ const CollectionsSection = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
-
   // Helper function to construct proper category image URL
   const getCategoryImageUrl = (category) => {
     // If the image_url contains the full Supabase storage URL, use it directly
-    if (category.image_url && category.image_url.includes('supabase.co/storage')) {
+    if (category.image_url?.includes('supabase.co/storage')) {
       return category.image_url;
     }
 
@@ -280,14 +277,13 @@ const CollectionsSection = () => {
 
   return (
     <section className="py-16 lg:py-24 bg-background">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl lg:text-4xl font-montserrat font-bold text-primary">Koleksi Batik Kenanga</h2>
-          <p className="font-lora text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
+      <div className="container mx-auto px-4">        <div className="text-center mb-8 md:mb-12">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-montserrat font-bold text-primary">Koleksi Batik Kenanga</h2>
+          <p className="font-lora text-base sm:text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
             Temukan berbagai pilihan batik untuk setiap kebutuhan dan identitas Anda.
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {categories.map((category, index) => (
             <motion.div
               key={category.id}
@@ -296,22 +292,22 @@ const CollectionsSection = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.15 }}
             >
-              <Link to={`/products?category=${category.slug || category.id}`} className="block group">
-                <div className="bg-card rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 h-full flex flex-col">                  <div className="aspect-video bg-muted relative overflow-hidden">
+              <Link to={`/products?category=${category.slug || category.id}`} className="block group">                <div className="bg-card rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 h-full flex flex-col">
+                  <div className="aspect-video sm:aspect-[4/3] bg-muted relative overflow-hidden">
                     <img 
                       src={getCategoryImageUrl(category)} 
                       alt={category.name} 
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent flex items-end">
-                      <h3 className="text-primary-foreground font-montserrat font-semibold text-2xl p-6">{category.name}</h3>
+                      <h3 className="text-primary-foreground font-montserrat font-semibold text-lg sm:text-xl lg:text-2xl p-4 sm:p-6">{category.name}</h3>
                     </div>
                   </div>
-                  <div className="p-6 flex-grow">
-                    <p className="font-lora text-muted-foreground text-base line-clamp-3">{category.description}</p>
+                  <div className="p-4 sm:p-6 flex-grow">
+                    <p className="font-lora text-muted-foreground text-sm sm:text-base line-clamp-3">{category.description}</p>
                   </div>
-                  <div className="p-6 pt-0">
-                     <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground font-montserrat">Lihat Koleksi</Button>
+                  <div className="p-4 sm:p-6 pt-0">
+                     <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground font-montserrat text-sm sm:text-base">Lihat Koleksi</Button>
                   </div>
                 </div>
               </Link>
@@ -327,28 +323,26 @@ const WhyChooseUsSection = () => {
   const { companyInfo } = useCompanyInfo();
   
   if (!companyInfo?.whyChooseUs) return null;
-  
-  const getIcon = (iconName) => {
+    const getIcon = (iconName) => {
     switch (iconName) {
-      case "Palette": return <Palette className="h-8 w-8 text-primary" />;
-      case "ShieldCheck": return <ShieldCheck className="h-8 w-8 text-primary" />;
-      case "Scroll": return <Scroll className="h-8 w-8 text-primary" />;
-      case "Users": return <Users className="h-8 w-8 text-primary" />;
+      case "Palette": return <Palette className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />;
+      case "ShieldCheck": return <ShieldCheck className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />;
+      case "Scroll": return <Scroll className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />;
+      case "Users": return <Users className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />;
       default: return null;
     }
   };
-
   return (
     <section className="py-16 lg:py-24 bg-secondary/30 relative">
       <div className="absolute inset-0 batik-bg-pattern"></div>
       <div className="container mx-auto px-4 relative">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl lg:text-4xl font-montserrat font-bold text-primary">Mengapa Memilih Batik Kenanga</h2>
-          <p className="font-lora text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
+        <div className="text-center mb-8 md:mb-12">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-montserrat font-bold text-primary">Mengapa Memilih Batik Kenanga</h2>
+          <p className="font-lora text-base sm:text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
             Dedikasi kami untuk kualitas, otentisitas, dan kepuasan Anda.
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
           {companyInfo.whyChooseUs.map((item, index) => (
             <motion.div
               key={item.title}
@@ -356,13 +350,13 @@ const WhyChooseUsSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.3, delay: index * 0.1 }}
-              className="bg-card p-6 rounded-lg shadow-lg text-center border border-transparent hover:border-primary transition-all"
+              className="bg-card p-4 sm:p-6 rounded-lg shadow-lg text-center border border-transparent hover:border-primary transition-all"
             >
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6 mx-auto">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4 sm:mb-6 mx-auto">
                 {getIcon(item.icon)}
               </div>
-              <h3 className="text-xl font-montserrat font-semibold mb-3 text-foreground">{item.title}</h3>
-              <p className="font-lora text-muted-foreground text-base leading-relaxed">{item.description}</p>
+              <h3 className="text-lg sm:text-xl font-montserrat font-semibold mb-2 sm:mb-3 text-foreground">{item.title}</h3>
+              <p className="font-lora text-muted-foreground text-sm sm:text-base leading-relaxed">{item.description}</p>
             </motion.div>
           ))}
         </div>
