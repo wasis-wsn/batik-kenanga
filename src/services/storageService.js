@@ -59,6 +59,7 @@ export class SupabaseStorageService {
       case STORAGE_BUCKETS.IMAGES:
       case STORAGE_BUCKETS.PRODUCTS:
       case STORAGE_BUCKETS.COMPANY:
+      case STORAGE_BUCKETS.DOCUMENTS:
         return 10 * 1024 * 1024; // 10MB
       default:
         return 10 * 1024 * 1024; // 10MB (updated from 5MB)
