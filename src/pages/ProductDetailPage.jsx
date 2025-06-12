@@ -155,7 +155,7 @@ const ProductDetailPage = () => {
               
               {/* Price */}
               <div className="text-2xl font-bold text-primary mb-4">
-                {formatCurrency(product.price)}
+                {formatCurrency(product.price)} / 10M
               </div>
               
               {/* Description */}
