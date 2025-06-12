@@ -9,14 +9,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/components/ui/use-toast';
-import { supabase } from '@/services/supabase';
 import {
   ArrowLeft,
   Save,
   User,
-  Mail,
-  Phone,
-  Shield,
   Eye,
   EyeOff,
   Upload,
@@ -117,7 +113,7 @@ const UserFormPage = () => {
       newErrors.confirmPassword = 'Konfirmasi password tidak sesuai';
     }
 
-    if (formData.phone && !/^[\+]?[0-9\s\-\(\)]+$/.test(formData.phone)) {
+    if (formData.phone && !/^[+]?[0-9\s-()]+$/.test(formData.phone)) {
       newErrors.phone = 'Format nomor telepon tidak valid';
     }
 
@@ -267,9 +263,8 @@ const UserFormPage = () => {
                             Upload Foto
                           </span>
                         </Button>
-                      </Label>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        JPG, PNG hingga 2MB
+                      </Label>                      <p className="text-sm text-muted-foreground mt-1">
+                        JPG, PNG hingga 10MB
                       </p>
                     </div>
                   </div>

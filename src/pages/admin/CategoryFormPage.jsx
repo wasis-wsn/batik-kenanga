@@ -13,12 +13,10 @@ const CategoryFormPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const isEdit = Boolean(id);
-  const [loading, setLoading] = useState(false);
+  const isEdit = Boolean(id);  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-  const [imageUploading, setImageUploading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -245,9 +243,8 @@ const CategoryFormPage = () => {
                       <X className="h-3 w-3" />
                     </Button>
                   </div>
-                )}
-                <p className="text-sm text-gray-500">
-                  Recommended size: 400x300px. Max size: 5MB
+                )}                <p className="text-sm text-gray-500">
+                  Recommended size: 400x300px. Max size: 10MB
                 </p>
               </div>
             </div>

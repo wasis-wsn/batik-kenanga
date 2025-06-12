@@ -53,8 +53,7 @@ export class SupabaseStorageService {
       default:
         return null;
     }
-  }
-  // Get file size limit for each bucket (in bytes)
+  }  // Get file size limit for each bucket (in bytes)
   getFileSizeLimit(bucketName) {
     switch (bucketName) {
       case STORAGE_BUCKETS.IMAGES:
@@ -62,7 +61,7 @@ export class SupabaseStorageService {
       case STORAGE_BUCKETS.COMPANY:
         return 10 * 1024 * 1024; // 10MB
       default:
-        return 5 * 1024 * 1024; // 5MB
+        return 10 * 1024 * 1024; // 10MB (updated from 5MB)
     }
   }
   // Upload file to specific bucket with enhanced error handling
