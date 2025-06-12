@@ -243,10 +243,10 @@ const ProductFormPage = () => {
   const handleProductImageChange = (e) => {
     const files = Array.from(e.target.files);
     const validFiles = files.filter(file => {
-      if (file.size > 5 * 1024 * 1024) {
+      if (file.size > 10 * 1024 * 1024) {
         toast({
           title: 'Error',
-          description: `${file.name} is too large. Maximum size is 5MB`,
+          description: `${file.name} is too large. Maximum size is 10MB`,
           variant: 'destructive',
         });
         return false;
@@ -261,10 +261,10 @@ const ProductFormPage = () => {
   const handleStampingToolImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
+      if (file.size > 10 * 1024 * 1024) {
         toast({
           title: 'Error',
-          description: 'Image size must be less than 5MB',
+          description: 'Image size must be less than 10MB',
           variant: 'destructive',
         });
         return;

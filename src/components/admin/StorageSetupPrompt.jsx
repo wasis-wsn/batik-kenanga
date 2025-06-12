@@ -79,7 +79,7 @@ const StorageSetupPrompt = ({ onRetry }) => {
             <ol className="text-sm space-y-1 text-gray-700">
               <li>1. Go to <span className="font-mono bg-gray-100 px-1 rounded">Storage → Buckets</span> in Supabase Dashboard</li>
               <li>2. Create each bucket with <span className="font-semibold">Public = Yes</span></li>
-              <li>3. Set appropriate file size limits (10MB for images, 5MB for documents)</li>
+              <li>3. Set appropriate file size limits (10MB for images)</li>
               <li>4. Click the retry button below to test the setup</li>
             </ol>
           </div>
