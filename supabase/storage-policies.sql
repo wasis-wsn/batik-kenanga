@@ -4,10 +4,10 @@
 -- Create storage buckets with proper policies
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 VALUES 
-  ('images', 'images', true, 52428800, ARRAY['image/jpeg', 'image/png', 'image/gif', 'image/webp']),
+  ('images', 'images', true, 10485760, ARRAY['image/jpeg', 'image/png', 'image/gif', 'image/webp']),
   ('documents', 'documents', true, 10485760, ARRAY['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']),
-  ('products', 'products', true, 52428800, ARRAY['image/jpeg', 'image/png', 'image/gif', 'image/webp']),
-  ('company', 'company', true, 52428800, ARRAY['image/jpeg', 'image/png', 'image/gif', 'image/webp'])
+  ('products', 'products', true, 10485760, ARRAY['image/jpeg', 'image/png', 'image/gif', 'image/webp']),
+  ('company', 'company', true, 10485760, ARRAY['image/jpeg', 'image/png', 'image/gif', 'image/webp'])
 ON CONFLICT (id) DO NOTHING;
 
 -- Enable RLS on storage.objects table

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save, Star, Upload, X, Image, Building2, FileImage, Plus, Palette } from 'lucide-react';
+import { ArrowLeft, Save, Upload, X, Image, Building2, FileImage, Plus } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
@@ -156,13 +156,11 @@ const TestimonialFormPage = () => {
         variant: "destructive",
       });
       return;
-    }
-
-    // Validate file size (5MB limit)
-    if (file.size > 5 * 1024 * 1024) {
+    }    // Validate file size (10MB limit)
+    if (file.size > 10 * 1024 * 1024) {
       toast({
         title: "Error",
-        description: "File size must be less than 5MB",
+        description: "File size must be less than 10MB",
         variant: "destructive",
       });
       return;
@@ -569,9 +567,8 @@ const TestimonialFormPage = () => {
                 <p className="text-sm text-gray-600">Upload up to 3 images</p>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {[0, 1, 2].map((index) => (
-                    <div key={index}>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">                  {[0, 1, 2].map((index) => (
+                    <div key={`gallery-upload-${index}`}>
                       {renderFileUpload('gallery', `Image ${index + 1}`, <Image className="h-8 w-8 text-gray-400" />, index)}
                     </div>
                   ))}
@@ -639,9 +636,8 @@ const TestimonialFormPage = () => {
                 <p className="text-sm text-gray-600">Select up to 3 colors</p>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {formData.colors.map((colorObj, index) => (
-                    <div key={index} className="flex items-center gap-3 p-3 border rounded-lg">
+                <div className="space-y-3">                  {formData.colors.map((colorObj, index) => (
+                    <div key={`color-${index}-${colorObj.hex}`} className="flex items-center gap-3 p-3 border rounded-lg">
                       <input
                         type="color"
                         value={colorObj.hex}

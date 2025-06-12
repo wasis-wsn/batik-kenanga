@@ -7,10 +7,10 @@ ALTER TABLE storage.buckets DISABLE ROW LEVEL SECURITY;
 -- Step 2: Create storage buckets
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 VALUES 
-  ('images', 'images', true, 52428800, ARRAY['image/jpeg', 'image/png', 'image/gif', 'image/webp']),
+  ('images', 'images', true, 10485760, ARRAY['image/jpeg', 'image/png', 'image/gif', 'image/webp']),
   ('documents', 'documents', true, 10485760, ARRAY['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']),
-  ('products', 'products', true, 52428800, ARRAY['image/jpeg', 'image/png', 'image/gif', 'image/webp']),
-  ('company', 'company', true, 52428800, ARRAY['image/jpeg', 'image/png', 'image/gif', 'image/webp'])
+  ('products', 'products', true, 10485760, ARRAY['image/jpeg', 'image/png', 'image/gif', 'image/webp']),
+  ('company', 'company', true, 10485760, ARRAY['image/jpeg', 'image/png', 'image/gif', 'image/webp'])
 ON CONFLICT (id) DO NOTHING;
 
 -- Step 3: Re-enable RLS on buckets with permissive policy

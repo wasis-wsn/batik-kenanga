@@ -12,7 +12,7 @@ console.log('');
 
 const REQUIRED_BUCKETS = [
   { name: 'images', description: 'Company images and general photos', size: '10MB', types: 'JPEG, PNG, WebP, GIF' },
-  { name: 'documents', description: 'PDF files and documents', size: '5MB', types: 'PDF, DOC, DOCX' },
+  { name: 'documents', description: 'PDF files and documents', size: '10MB', types: 'PDF, DOC, DOCX' },
   { name: 'products', description: 'Product-related images', size: '10MB', types: 'JPEG, PNG, WebP, GIF' },
   { name: 'company', description: 'Company-specific media assets', size: '10MB', types: 'JPEG, PNG, WebP, GIF' }
 ];

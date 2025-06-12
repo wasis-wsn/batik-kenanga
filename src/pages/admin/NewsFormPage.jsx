@@ -115,7 +115,6 @@ const NewsFormPage = () => {
       ...(name === 'title' && !isEdit ? { slug: generateSlug(value) } : {})
     }));
   };
-
   const handleMainImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -130,11 +129,11 @@ const NewsFormPage = () => {
       return;
     }
 
-    // Validate file size (5MB limit)
-    if (file.size > 5 * 1024 * 1024) {
+    // Validate file size (10MB limit)
+    if (file.size > 10 * 1024 * 1024) {
       toast({
         title: "Error",
-        description: "File size must be less than 5MB",
+        description: "File size must be less than 10MB",
         variant: "destructive",
       });
       return;
@@ -151,9 +150,7 @@ const NewsFormPage = () => {
 
   const handleRelatedImageChange = (index) => (e) => {
     const file = e.target.files[0];
-    if (!file) return;
-
-    // Validate file type
+    if (!file) return;    // Validate file type
     if (!file.type.startsWith('image/')) {
       toast({
         title: "Error",
@@ -163,11 +160,11 @@ const NewsFormPage = () => {
       return;
     }
 
-    // Validate file size (5MB limit)
-    if (file.size > 5 * 1024 * 1024) {
+    // Validate file size (10MB limit)
+    if (file.size > 10 * 1024 * 1024) {
       toast({
         title: "Error",
-        description: "File size must be less than 5MB",
+        description: "File size must be less than 10MB",
         variant: "destructive",
       });
       return;
@@ -489,9 +486,9 @@ const NewsFormPage = () => {
                 <p className="text-sm text-gray-600">Add multiple images to showcase in the article</p>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">                  
                   {previews.relatedImages.map((preview, index) => (
-                    <div key={index} className="space-y-2">
+                    <div key={`related-image-${index}-${preview ? preview.slice(-10) : index}`} className="space-y-2">
                       <Label>Related Image {index + 1}</Label>
                       {preview && (
                         <div className="relative">
