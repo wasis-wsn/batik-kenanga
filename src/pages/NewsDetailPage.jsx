@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Calendar, ArrowLeft, ArrowRight, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getAllNews, getNewsBySlug } from '../services/supabase';
+import '../styles/news-content.css';
 
 const NewsDetailPage = () => {
   const { slug } = useParams();
@@ -103,18 +104,18 @@ const NewsDetailPage = () => {
 
               <h1 className="text-3xl md:text-4xl font-montserrat font-bold mb-6">
                 {currentNews.title}
-              </h1>
-
-              <div className="prose max-w-none mb-8"
+              </h1>              
+              <div className="news-content mb-8"
                 dangerouslySetInnerHTML={{ __html: currentNews.content }}
-              />              {/* Image Gallery */}
+              />
+              {/* Image Gallery */}              
               {currentNews.related_images && currentNews.related_images.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
                   {currentNews.related_images.map((image, index) => (
-                    <div key={`related-${index}`} className="aspect-video rounded-lg overflow-hidden">
+                    <div key={`related-image-${currentNews.id}-${index}`} className="aspect-video rounded-lg overflow-hidden">
                       <img
                         src={image}
-                        alt={`Related image ${index + 1}`}
+                        alt={`Related-image ${index + 1}`}
                         className="w-full h-full object-cover"
                       />
                     </div>

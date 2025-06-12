@@ -1,0 +1,199 @@
+/* Custom prose styles for news content that matches the rich text editor */
+
+.news-content {
+  font-family: inherit;
+  line-height: 1.6;
+  font-size: 16px;
+  color: #1f2937 !important;
+  max-width: none;
+  background: transparent !important;
+}
+
+.news-content * {
+  background: transparent !important;
+}
+
+/* Reset any blue highlighting */
+.news-content p,
+.news-content div,
+.news-content span {
+  background: transparent !important;
+  color: inherit !important;
+}
+
+/* Heading Styles - matching rich text editor */
+.news-content h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 1.5rem 0 1rem 0;
+  color: #111827;
+  line-height: 1.2;
+}
+
+.news-content h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 1.25rem 0 0.875rem 0;
+  color: #111827;
+  line-height: 1.3;
+}
+
+.news-content h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 1rem 0 0.75rem 0;
+  color: #374151;
+  line-height: 1.4;
+}
+
+.news-content h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0.875rem 0 0.625rem 0;
+  color: #374151;
+  line-height: 1.4;
+}
+
+.news-content h5 {
+  font-size: 1.125rem;
+  font-weight: 500;
+  margin: 0.75rem 0 0.5rem 0;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.news-content h6 {
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0.625rem 0 0.5rem 0;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+/* Paragraph Styles */
+.news-content p {
+  margin: 0.75rem 0;
+  line-height: 1.7;
+  color: #1f2937 !important;
+  background: transparent !important;
+}
+
+/* Remove any text selection highlighting issues */
+.news-content ::selection {
+  background: rgba(59, 130, 246, 0.2);
+  color: inherit;
+}
+
+/* Text Formatting */
+.news-content strong {
+  font-weight: 700;
+}
+
+.news-content em {
+  font-style: italic;
+}
+
+.news-content u {
+  text-decoration: underline;
+}
+
+.news-content s {
+  text-decoration: line-through;
+}
+
+/* Text Alignment */
+.news-content .ql-align-left {
+  text-align: left;
+}
+
+.news-content .ql-align-center {
+  text-align: center;
+}
+
+.news-content .ql-align-right {
+  text-align: right;
+}
+
+.news-content .ql-align-justify {
+  text-align: justify;
+}
+
+/* Lists */
+.news-content ol,
+.news-content ul {
+  margin: 0.75rem 0;
+  padding-left: 1.5rem;
+}
+
+.news-content ol li,
+.news-content ul li {
+  margin: 0.25rem 0;
+  line-height: 1.6;
+}
+
+/* Blockquotes */
+.news-content blockquote {
+  border-left: 4px solid #d1d5db;
+  margin: 1rem 0;
+  padding-left: 1rem;
+  font-style: italic;
+  color: #6b7280;
+}
+
+/* Code blocks */
+.news-content pre {
+  background-color: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  color: #374151;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'Courier New', monospace;
+  font-size: 14px;
+  margin: 1rem 0;
+  padding: 1rem;
+  white-space: pre-wrap;
+}
+
+.news-content code {
+  background-color: #f3f4f6;
+  border-radius: 3px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'Courier New', monospace;
+  font-size: 14px;
+  padding: 0.2rem 0.4rem;
+}
+
+/* Links */
+.news-content a {
+  color: #3b82f6;
+  text-decoration: underline;
+}
+
+.news-content a:hover {
+  color: #1d4ed8;
+}
+
+/* Images */
+.news-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin: 0.5rem 0;
+}
+
+/* Tables */
+.news-content table {
+  border-collapse: collapse;
+  margin: 1rem 0;
+  width: 100%;
+}
+
+.news-content th,
+.news-content td {
+  border: 1px solid #e5e7eb;
+  padding: 0.5rem;
+  text-align: left;
+}
+
+.news-content th {
+  background-color: #f9fafb;
+  font-weight: 600;
+}
