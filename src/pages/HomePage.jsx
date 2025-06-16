@@ -220,20 +220,6 @@ const CollectionsSection = () => {
   const { toast } = useToast();
   // Helper function to construct proper category image URL
   const getCategoryImageUrl = (category) => {
-    // If the image_url contains the full Supabase storage URL, use it directly
-    if (category.image_url?.includes('supabase.co/storage')) {
-      return category.image_url;
-    }
-
-    // If we have a category ID, construct the proper Supabase storage path
-    if (category.id) {
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      // Assume the file extension is jpg (or check the image_url for extension)
-      const fileExtension = category.image_url?.split('.').pop() || 'jpg';
-      return `${supabaseUrl}/storage/v1/object/public/images/category/${category.id}/category${category.id}.${fileExtension}`;
-    }
-
-    // Fallback to the original image_url or default image
     return category.image_url || '/images/batik_koleksi.jpg';
   };
 
@@ -292,7 +278,8 @@ const CollectionsSection = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.15 }}
             >
-              <Link to={`/products?category=${category.slug || category.id}`} className="block group">                <div className="bg-card rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 h-full flex flex-col">
+              <Link to={`/products?category=${category.slug || category.id}`} className="block group">                
+              <div className="bg-card rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 h-full flex flex-col">
                   <div className="aspect-video sm:aspect-[4/3] bg-muted relative overflow-hidden">
                     <img 
                       src={getCategoryImageUrl(category)} 
