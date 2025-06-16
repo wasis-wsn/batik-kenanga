@@ -315,11 +315,12 @@ export const productService = {
       throw error;
     }
   },
+
   // Get all categories for dropdown
   async getAllCategories() {
     const { data, error } = await supabase
       .from('categories')
-      .select('id, name, slug, image_url, description')
+      .select('id, name, slug')
       .order('name');
     
     if (error) throw error;
