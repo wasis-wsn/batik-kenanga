@@ -114,7 +114,7 @@ const CartPage = () => {
               <div className="p-6 border-b border-border">
                 <h2 className="text-xl font-semibold">Produk ({cartItems.length})</h2>
                 <p className="text-sm text-muted-foreground mt-2">
-                  <span className="font-medium">Catatan:</span> Ukuran yang ditampilkan hanyalah ukuran yang tersedia untuk produk. Harga tetap dihitung per 10 meter.
+                  <span className="font-medium">Catatan:</span> Ukuran yang ditampilkan hanyalah ukuran yang ditetapkan oleh kami. Harga tetap dihitung per meter dan dilakukan secara pre-order.
                 </p>
               </div>
               
@@ -134,7 +134,8 @@ const CartPage = () => {
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="flex-grow">                      <Link to={`/products/${item.id}`} className="font-medium hover:text-primary transition-colors">
+                    <div className="flex-grow">                      
+                      <Link to={`/products/${item.id}`} className="font-medium hover:text-primary transition-colors">
                         {item.name}
                       </Link>
                       <p className="text-sm text-muted-foreground mb-2">
