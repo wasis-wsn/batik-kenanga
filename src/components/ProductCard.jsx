@@ -41,7 +41,7 @@ const ProductCard = ({ product }) => {
           <CardContent className="p-4">
             <h3 className="font-medium text-foreground line-clamp-1">{product.name}</h3>
             <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{product.description}</p>
-            <div className="mt-2 font-semibold text-foreground">{formatCurrency(product.price)}/10M</div>
+            <div className="mt-2 font-semibold text-foreground">{formatCurrency(product.price)}/M</div>
           </CardContent>
           <CardFooter className="p-4 pt-0">
             <Button 
