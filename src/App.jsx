@@ -35,7 +35,7 @@ import NewsManagementPage from '@/pages/admin/NewsManagementPage';
 import NewsFormPage from '@/pages/admin/NewsFormPage';
 import TestimonialsManagementPage from '@/pages/admin/TestimonialsManagementPage';
 import TestimonialFormPage from '@/pages/admin/TestimonialFormPage';
-import UserManagementPage from '@/pages/admin/UserManagementPage';
+// import UserManagementPage from '@/pages/admin/UserManagementPage';
 import UserFormPage from '@/pages/admin/UserFormPage';
 import CompanyInfoPage from '@/pages/admin/CompanyInfoPage';
 import MediaLibraryPage from '@/pages/admin/MediaLibraryPage';
@@ -91,9 +91,9 @@ function App() {
                   <Route path="/testimonials/:id/edit" element={<TestimonialFormPage />} />
 
                   {/* User Management */}
-                  <Route path="/users" element={<UserManagementPage />} />
+                  {/* <Route path="/users" element={<UserManagementPage />} />
                   <Route path="/users/new" element={<UserFormPage />} />
-                  <Route path="/users/:id/edit" element={<UserFormPage />} />
+                  <Route path="/users/:id/edit" element={<UserFormPage />} /> */}
 
                   {/* Company & Settings */}
                   <Route path="/company" element={<CompanyInfoPage />} />

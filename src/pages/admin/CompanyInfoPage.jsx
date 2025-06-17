@@ -144,7 +144,7 @@ const CompanyInfoPage = () => {  const { toast } = useToast();
 
     try {
       setSaving(true);
-        const updateData = {
+      const updateData = {
         name: formData.name,
         tagline: formData.tagline,
         established: formData.founded_year ? parseInt(formData.founded_year) : null,
@@ -167,8 +167,9 @@ const CompanyInfoPage = () => {  const { toast } = useToast();
           facebook: formData.facebook,
           twitter: formData.twitter,
           linkedin: formData.linkedin,
-          youtube: formData.youtube,        },
-        team: cleanTeamData(teamData),
+          youtube: formData.youtube,
+        },
+        // team: cleanTeamData(teamData), // <-- REMOVE this line to decouple team from company info save
       };
 
       await updateCompanyInfo(updateData);
@@ -397,7 +398,8 @@ const CompanyInfoPage = () => {  const { toast } = useToast();
                   const fileName = member.imageUrl.split('/').pop();
                   const file = new File([blob], fileName, { type: blob.type });
                   
-                  // Upload to new sequential location                const newImageUrl = await uploadTeamMemberImage(file, newIndex, member.imageUrl);
+                  // Upload to new sequential location                
+                  // const newImageUrl = await uploadTeamMemberImage(file, newIndex, member.imageUrl);
                   updatedMember.imageUrl = newImageUrl;
                   
                 } catch (error) {
@@ -629,7 +631,8 @@ const CompanyInfoPage = () => {  const { toast } = useToast();
                 />
               </div>
             </div>
-          </CardContent>        </Card>
+          </CardContent>        
+          </Card>
 
         {/* Image Uploads */}
         <Card>
@@ -766,9 +769,22 @@ const CompanyInfoPage = () => {  const { toast } = useToast();
               <p>• Profile Image: Recommended size 800x600px, used in about/profile sections</p>
             </div>
           </CardContent>
-        </Card>
+        </Card>        
+        {/* Save Button */}
+        <div className="flex justify-end">
+          <Button type="submit" disabled={saving}>
+            {saving ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+            ) : (
+              <Save className="h-4 w-4 mr-2" />
+            )}
+            Save Changes
+          </Button>
+        </div>
 
-        {/* Team Management */}
+      </form>      
+      {/* Team Management - Separate Form */}
+      <form onSubmit={(e) => e.preventDefault()}>
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -972,23 +988,12 @@ const CompanyInfoPage = () => {  const { toast } = useToast();
                 >
                   Save Team Data to Database
                 </Button>
-              </div>
+              </div>            
             )}
           </CardContent>
         </Card>
-
-        {/* Save Button */}
-        <div className="flex justify-end">
-          <Button type="submit" disabled={saving}>
-            {saving ? (
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-            ) : (
-              <Save className="h-4 w-4 mr-2" />
-            )}
-            Save Changes
-          </Button>
-        </div>
       </form>
+
     </div>
   );
 };
