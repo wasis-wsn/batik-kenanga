@@ -320,7 +320,7 @@ export const productService = {
   async getAllCategories() {
     const { data, error } = await supabase
       .from('categories')
-      .select('id, name, slug')
+      .select('id, name, slug, image_url, description')
       .order('name');
     
     if (error) throw error;

@@ -164,7 +164,7 @@ const CostumerPage = () => {
                 <h3 className="font-montserrat font-semibold mb-4">Brand Anda</h3>
                 <div className="aspect-video bg-secondary/30 rounded-lg flex items-center justify-center mb-4">
                   <img
-                    src="/images/logo-fisip-orange.png"
+                    src="/images/logo-fisip-orange.jpg"
                     alt="Sample Brand Logo"
                     className="max-h-24"
                   />
