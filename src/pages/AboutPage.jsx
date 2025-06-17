@@ -74,7 +74,7 @@ const AboutPage = () => {
               </div>
                <div className="absolute -bottom-5 -left-5 bg-card p-4 rounded-lg shadow-xl max-w-sm border border-secondary">
                 <p className="font-playfair-display text-lg font-semibold text-primary">
-                  "Setiap goresan canting adalah doa, setiap warna adalah jiwa."
+                  "{companyInfo.tagline}"
                 </p>
               </div>
             </motion.div>

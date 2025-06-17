@@ -65,11 +65,11 @@ const sidebarItems = [
     href: '/admin/media',
     icon: Image,
   },
-  {
-    title: 'Users',
-    href: '/admin/users',
-    icon: Users,
-  },
+  // {
+  //   title: 'Users',
+  //   href: '/admin/users',
+  //   icon: Users,
+  // },
   {
     title: 'Settings',
     href: '/admin/settings',

@@ -149,12 +149,6 @@ const AdminLoginPage = () => {
             </form>
           </CardContent>
         </Card>
-
-        <div className="text-center">
-          <p className="text-sm text-gray-600">
-            Demo credentials: admin@batikkenanga.com / admin123
-          </p>
-        </div>
       </div>
     </div>
   );
