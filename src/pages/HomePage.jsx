@@ -263,7 +263,8 @@ const CollectionsSection = () => {
 
   return (
     <section className="py-16 lg:py-24 bg-background">
-      <div className="container mx-auto px-4">        <div className="text-center mb-8 md:mb-12">
+      <div className="container mx-auto px-4">        
+        <div className="text-center mb-8 md:mb-12">
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-montserrat font-bold text-primary">Koleksi Batik Kenanga</h2>
           <p className="font-lora text-base sm:text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
             Temukan berbagai pilihan batik untuk setiap kebutuhan dan identitas Anda.

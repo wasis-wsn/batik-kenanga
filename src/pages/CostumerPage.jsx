@@ -164,19 +164,19 @@ const CostumerPage = () => {
                 <h3 className="font-montserrat font-semibold mb-4">Brand Anda</h3>
                 <div className="aspect-video bg-secondary/30 rounded-lg flex items-center justify-center mb-4">
                   <img
-                    src="/images/sample-logo.jpeg"
+                    src="/images/logo-fisip-orange.jpg"
                     alt="Sample Brand Logo"
                     className="max-h-24"
                   />
                 </div>
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-[#ef1c23]" />
+                    <div className="w-6 h-6 rounded-full bg-[#CA4A0D]" />
                     <span className="text-sm text-muted-foreground">Primary Red</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-[#64748b]" />
-                    <span className="text-sm text-muted-foreground">Secondary Gray</span>
+                    <div className="w-6 h-6 rounded-full bg-[#FF8B2C]" />
+                    <span className="text-sm text-muted-foreground">Secondary Orange</span>
                   </div>
                 </div>
               </div>
@@ -196,11 +196,11 @@ const CostumerPage = () => {
                     <div className="flex flex-col h-full justify-between">
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-[#ef1c23]" />
+                          <div className="w-6 h-6 rounded-full bg-[#CA4A0D]" />
                           <span className="text-sm text-muted-foreground">≈ 85% match</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-[#64748b]" />
+                          <div className="w-6 h-6 rounded-full bg-[#FF8B2C]" />
                           <span className="text-sm text-muted-foreground">≈ 90% match</span>
                         </div>
                       </div>
@@ -227,7 +227,7 @@ const CostumerPage = () => {
                 <h3 className="font-montserrat font-semibold mb-4">Hasil Akhir</h3>
                 <div className="aspect-video bg-secondary/30 rounded-lg overflow-hidden mb-4">
                   <img
-                    src="/images/custom-result.jpeg"
+                    src="/images/custom_result.jpg"
                     alt="Custom Batik Result"
                     className="w-full h-full object-cover"
                   />
