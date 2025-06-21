@@ -116,6 +116,54 @@ export class SupabaseStorageService {
       throw error;
     }
   }
+  // Upload file with upsert option (for team member images)
+  async uploadFileWithUpsert(bucketName, file, fileName) {
+    try {
+      // First check if bucket exists
+      const bucketAvailable = await this.checkBucketsAvailability();
+      if (!bucketAvailable) {
+        throw new Error('Storage buckets not configured. Please set up buckets in Supabase Dashboard.');
+      }
+
+      // Upload file with upsert to overwrite if exists
+      const { data, error } = await this.storage
+        .from(bucketName)
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true // Allow overwriting existing files
+        });
+
+      if (error) {
+        // Provide more specific error messages
+        if (error.message.includes('new row violates row-level security policy')) {
+          throw new Error('Storage bucket permissions not configured properly. Please check bucket policies.');
+        } else if (error.message.includes('exceeded the maximum allowed size')) {
+          throw new Error(`File too large. Maximum allowed size for ${bucketName} bucket is ${this.getFileSizeLimit(bucketName) / (1024 * 1024)}MB.`);
+        } else if (error.message.includes('Bucket not found')) {
+          throw new Error(`Bucket '${bucketName}' does not exist. Please create it in Supabase Dashboard.`);
+        }
+        throw error;
+      }
+
+      // Get public URL
+      const { data: urlData } = this.storage
+        .from(bucketName)
+        .getPublicUrl(data.path);
+
+      return {
+        path: data.path,
+        fullPath: data.fullPath,
+        publicUrl: urlData.publicUrl,
+        fileName: file.name,
+        fileSize: file.size,
+        mimeType: file.type,
+        bucketName
+      };
+    } catch (error) {
+      console.error('Error uploading file with upsert:', error);
+      throw error;
+    }
+  }
 
   // Upload multiple files
   async uploadMultipleFiles(bucketName, files) {

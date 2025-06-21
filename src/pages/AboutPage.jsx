@@ -149,33 +149,90 @@ const AboutPage = () => {
             <p className="font-playfair-display text-xl text-muted-foreground max-w-2xl mx-auto">
               Figur-figur kunci yang membangun dan mengembangkan warisan Batik Kenanga.
             </p>
-          </div>          <div className="grid md:grid-cols-2 gap-10 max-w-4xl mx-auto">            {finalCompanyInfo.team.map((member, index) => (
+          </div>              
+          {/* First member - centered */}
+          {finalCompanyInfo.team.length > 0 && (
+            <div className="flex justify-center mb-12">
               <motion.div
-                key={member.id || `team-member-${index}`}
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.2 }}
-                className="bg-card rounded-lg shadow-xl overflow-hidden flex flex-col sm:flex-row items-center"
-              >
-                <div className="w-full sm:w-1/3 aspect-square sm:aspect-auto sm:h-full">
-                  <img src={member.imageUrl} alt={member.name} className="w-full h-full object-cover" />
-                </div>
-                <div className="p-6 sm:w-2/3">
-                  <h3 className="font-montserrat font-bold text-2xl text-foreground">{member.name}</h3>
-                  <div className="space-y-2">
-                    <p className="font-playfair-display text-lg text-primary">{member.position}</p>
-                    <p className="text-sm text-muted-foreground font-medium italic">
-                      {member.period}
-                    </p>
+                transition={{ duration: 0.5 }}
+                className="bg-card rounded-lg shadow-xl overflow-hidden max-w-4xl w-full"
+              >                
+              <div className="flex flex-col md:flex-row">
+                  <div className="w-full md:w-1/2 h-96 md:h-80 flex-shrink-0 bg-gray-100 overflow-hidden">
+                    <img 
+                      src={finalCompanyInfo.team[0].imageUrl} 
+                      alt={finalCompanyInfo.team[0].name} 
+                      className="w-full h-full object-cover object-center hover:scale-105 transition-transform duration-300" 
+                    />
                   </div>
-                  <div className="mt-3 border-t border-border pt-3">
-                    <p className="text-muted-foreground leading-relaxed">{member.bio}</p>
+                  <div className="p-6 md:p-8 flex-1 flex flex-col justify-center">
+                    <h3 className="font-montserrat font-bold text-2xl md:text-3xl text-foreground mb-2">
+                      {finalCompanyInfo.team[0].name}
+                    </h3>
+                    <div className="space-y-2 mb-4">
+                      <p className="font-playfair-display text-lg md:text-xl text-primary">
+                        {finalCompanyInfo.team[0].position}
+                      </p>
+                      <p className="text-sm md:text-base text-muted-foreground font-medium italic">
+                        {finalCompanyInfo.team[0].period}
+                      </p>
+                    </div>
+                    <div className="border-t border-border pt-4">
+                      <p className="text-muted-foreground leading-relaxed text-sm md:text-base">
+                        {finalCompanyInfo.team[0].bio}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </motion.div>
-            ))}
-          </div>
+            </div>
+          )}          
+          {/* Remaining members - 2 per row */}
+          {finalCompanyInfo.team.length > 1 && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto">            
+              {finalCompanyInfo.team.slice(1).map((member, index) => (
+                <motion.div
+                  key={member.id || `team-member-${index + 1}`}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: (index + 1) * 0.2 }}
+                  className="bg-card rounded-lg shadow-xl overflow-hidden"
+                >                  
+                <div className="flex flex-col sm:flex-row">
+                    <div className="w-full md:w-1/2 h-96 md:h-80 flex-shrink-0 bg-gray-100 overflow-hidden">
+                      <img 
+                        src={member.imageUrl} 
+                        alt={member.name} 
+                        className="w-full h-full object-cover object-center hover:scale-105 transition-transform duration-300" 
+                      />
+                    </div>
+                    <div className="p-4 sm:p-6 flex-1 flex flex-col justify-center">
+                      <h3 className="font-montserrat font-bold text-lg sm:text-xl text-foreground mb-1">
+                        {member.name}
+                      </h3>
+                      <div className="space-y-1 mb-3">
+                        <p className="font-playfair-display text-base sm:text-lg text-primary">
+                          {member.position}
+                        </p>
+                        <p className="text-xs sm:text-sm text-muted-foreground font-medium italic">
+                          {member.period}
+                        </p>
+                      </div>
+                      <div className="border-t border-border pt-3">
+                        <p className="text-muted-foreground leading-relaxed text-sm">
+                          {member.bio}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </div>

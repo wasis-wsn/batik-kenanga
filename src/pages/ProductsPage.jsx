@@ -462,10 +462,50 @@ const ProductsPage = () => {
       </div>
     );
   }
-
   return (
     <div className="bg-background font-lora">
       <HeroCarousel featuredProducts={allProducts} />
+
+      {/* Important Notes Section */}
+      <section className="py-8 bg-secondary/10 border-b border-border">
+        <div className="container mx-auto px-4">
+          <div className="bg-card rounded-lg shadow-lg p-6">
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                <span className="text-primary font-montserrat font-bold text-sm">!</span>
+              </div>
+              <div className="flex-1">
+                <h3 className="font-montserrat font-semibold text-lg text-primary mb-3">
+                  Catatan Penting Pemesanan
+                </h3>
+                <div className="grid sm:grid-cols-1 md:grid-cols-3 gap-4 text-sm font-lora">
+                  <div className="flex items-start space-x-2">
+                    <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+                    <p className="text-muted-foreground">
+                      <span className="font-semibold text-foreground">Estimasi waktu:</span><br />
+                      maksimal 2 minggu setelah pemesanan
+                    </p>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+                    <p className="text-muted-foreground">
+                      <span className="font-semibold text-foreground">Minimal order:</span><br />
+                      10 meter
+                    </p>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+                    <p className="text-muted-foreground">
+                      <span className="font-semibold text-foreground">Kustomisasi:</span><br />
+                      Pelanggan dapat mengcustom barang dari warna, cap, teknik pewarnaan atau bisa dikombinasikan
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section className="py-12 lg:py-16">
         <div className="container mx-auto px-4">
