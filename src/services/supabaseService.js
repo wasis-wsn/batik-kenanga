@@ -226,38 +226,42 @@ export const companyInfoService = {  async getCompanyInfo() {
       throw error;
     }  },
 
-  // Note: Hero videos are now served statically from public/videos/
-  // Upload team member image with organized folder structure
-  async uploadTeamMemberImage(file, memberIndex, existingImageUrl = null) {
+  // Note: Hero videos are now served statically from public/videos/  // Upload team member image with organized folder structure
+  async uploadTeamMemberImage(file, memberId, existingImageUrl = null) {
     try {
-      // Delete existing image if exists
-      if (existingImageUrl?.includes('/storage/v1/object/public/company/team/')) {
-        const urlParts = existingImageUrl.split('/storage/v1/object/public/company/');
-        if (urlParts.length > 1) {
-          const filePath = urlParts[1];
-          try {
-            await storageService.deleteFile(STORAGE_BUCKETS.COMPANY, filePath);
-
-          } catch (deleteError) {
-            console.warn('Could not delete old team member image:', deleteError);
-            // Continue with upload even if delete fails
-          }
-        }
-      }
-      
-      // Create organized folder structure: team/{memberIndex}/foto.jpg
+      // Create organized folder structure: team/{memberId}/foto.jpg
       const fileExtension = file.name.split('.').pop();
       const fileName = `foto.${fileExtension}`;
-      const folderPath = `team/${memberIndex}/${fileName}`;
+      const folderPath = `team/${memberId}/${fileName}`;
       
-      // Upload new team member image
-      const uploadResult = await storageService.uploadFile(
+      // Delete existing files in the member's folder first
+      try {
+        // Try to delete using the existing URL if provided
+        if (existingImageUrl?.includes('/storage/v1/object/public/company/team/')) {
+          const urlParts = existingImageUrl.split('/storage/v1/object/public/company/');
+          if (urlParts.length > 1) {
+            const filePath = urlParts[1];
+            await storageService.deleteFile(STORAGE_BUCKETS.COMPANY, filePath);
+          }
+        } else {
+          // If no URL provided, try to delete all files in the folder
+          const files = await storageService.listFiles(STORAGE_BUCKETS.COMPANY, `team/${memberId}`);
+          for (const existingFile of files) {
+            await storageService.deleteFile(STORAGE_BUCKETS.COMPANY, existingFile.fullPath);
+          }
+        }
+      } catch (deleteError) {
+        console.warn('Could not delete existing team member images:', deleteError);
+        // Continue with upload even if delete fails
+      }
+      
+      // Upload new team member image with upsert to handle any remaining conflicts
+      const uploadResult = await storageService.uploadFileWithUpsert(
         STORAGE_BUCKETS.COMPANY, 
         file, 
         folderPath
       );
       
-
       return uploadResult.publicUrl;
     } catch (error) {
       console.error('Error uploading team member image:', error);
@@ -266,9 +270,9 @@ export const companyInfoService = {  async getCompanyInfo() {
   },
 
   // Delete team member folder and all its contents
-  async deleteTeamMemberImages(memberIndex) {
+  async deleteTeamMemberImages(memberId) {
     try {      // List all files in the member's folder
-      const files = await storageService.listFiles(STORAGE_BUCKETS.COMPANY, `team/${memberIndex}`);
+      const files = await storageService.listFiles(STORAGE_BUCKETS.COMPANY, `team/${memberId}`);
       
       // Delete all files in the folder
       for (const file of files) {

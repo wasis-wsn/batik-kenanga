@@ -22,7 +22,11 @@ const ProductFormPage = () => {
   const [imagePreview, setImagePreview] = useState(null);  const [productImageFiles, setProductImageFiles] = useState([]);
   const [stampingToolFiles, setStampingToolFiles] = useState([]);
   const [stampingToolInput, setStampingToolInput] = useState({ name: '', url: '', description: '', usageArea: '', imageFile: null });
-  const [productImageInput, setProductImageInput] = useState({ url: '', caption: '' });const [formData, setFormData] = useState({
+  const [productImageInput, setProductImageInput] = useState({ url: '', caption: '' });
+  
+  // Form validation state
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});const [formData, setFormData] = useState({
     name: '',
     slug: '',
     description: '',
@@ -44,6 +48,123 @@ const ProductFormPage = () => {
     product_images: [], // array of {url, caption} or {file, caption}
   });
   const [manualSlug, setManualSlug] = useState(false);
+  
+  // Form validation functions
+  const validateField = (name, value) => {
+    const newErrors = { ...errors };
+    
+    switch (name) {
+      case 'name':
+        if (!value.trim()) {
+          newErrors.name = 'Product name is required';
+        } else if (value.length < 3) {
+          newErrors.name = 'Product name must be at least 3 characters';
+        } else {
+          delete newErrors.name;
+        }
+        break;
+        
+      case 'price':
+        const priceNum = parseFloat(value);
+        if (!value) {
+          newErrors.price = 'Price is required';
+        } else if (isNaN(priceNum)) {
+          newErrors.price = 'Price must be a valid number';
+        } else if (priceNum < 0) {
+          newErrors.price = 'Price must be a positive number';
+        } else if (priceNum > 999999999) {
+          newErrors.price = 'Price is too large';
+        } else {
+          delete newErrors.price;
+        }
+        break;
+        
+      case 'stock':
+        const stockNum = parseInt(value);
+        if (value === '' || value === null) {
+          newErrors.stock = 'Stock is required';
+        } else if (isNaN(stockNum)) {
+          newErrors.stock = 'Stock must be a valid number';
+        } else if (stockNum < 0) {
+          newErrors.stock = 'Stock must be a positive number';
+        } else if (stockNum > 999999) {
+          newErrors.stock = 'Stock is too large';
+        } else {
+          delete newErrors.stock;
+        }
+        break;
+        
+      case 'category_id':
+        if (!value) {
+          newErrors.category_id = 'Category is required';
+        } else {
+          delete newErrors.category_id;
+        }
+        break;
+        
+      case 'description':
+        if (!value.trim()) {
+          newErrors.description = 'Description is required';
+        } else if (value.length < 10) {
+          newErrors.description = 'Description must be at least 10 characters';
+        } else {
+          delete newErrors.description;
+        }
+        break;
+        
+      default:
+        break;
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const validateForm = () => {
+    const fieldsToValidate = ['name', 'price', 'stock', 'category_id', 'description'];
+    let isValid = true;
+    
+    fieldsToValidate.forEach(field => {
+      const fieldIsValid = validateField(field, formData[field]);
+      if (!fieldIsValid) {
+        isValid = false;
+      }
+    });
+    
+    // Mark all fields as touched to show errors
+    const newTouched = {};
+    fieldsToValidate.forEach(field => {
+      newTouched[field] = true;
+    });
+    setTouched(newTouched);
+    
+    return isValid;
+  };
+
+  // Handle field blur to show validation errors
+  const handleFieldBlur = (field) => {
+    setTouched(prev => ({ ...prev, [field]: true }));
+    validateField(field, formData[field]);
+  };
+
+  // Format price input to only allow numbers and decimals
+  const formatPriceInput = (value) => {
+    let cleaned = value.replace(/[^0-9.]/g, '');
+    const parts = cleaned.split('.');
+    if (parts.length > 2) {
+      cleaned = parts[0] + '.' + parts.slice(1).join('');
+    }
+    if (parts[1] && parts[1].length > 2) {
+      cleaned = parts[0] + '.' + parts[1].substring(0, 2);
+    }
+    return cleaned;
+  };
+
+  // Format stock input to only allow integers
+  const formatStockInput = (value) => {
+    return value.replace(/[^0-9]/g, '');
+  };
+
   useEffect(() => {
     loadInitialData();
     if (isEditing) {
@@ -112,6 +233,17 @@ const ProductFormPage = () => {
     }
   };  const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate form before submission
+    if (!validateForm()) {
+      toast({
+        title: 'Validation Error',
+        description: 'Please fix the errors in the form before submitting',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
     setLoading(true);
 
     try {      
@@ -160,12 +292,26 @@ const ProductFormPage = () => {
       setLoading(false);
     }
   };
-
   const handleInputChange = (field, value) => {
+    let processedValue = value;
+    
+    // Apply input formatting for specific fields
+    if (field === 'price') {
+      processedValue = formatPriceInput(value);
+    } else if (field === 'stock') {
+      processedValue = formatStockInput(value);
+    }
+    
     setFormData(prev => ({
       ...prev,
-      [field]: value
+      [field]: processedValue
     }));
+    
+    // Validate field on change if it has been touched
+    if (touched[field]) {
+      validateField(field, processedValue);
+    }
+    
     if (field === 'slug') setManualSlug(true);
   };
 
@@ -368,16 +514,20 @@ const ProductFormPage = () => {
                     Enter the basic details of your product
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
+                <CardContent className="space-y-4">                  <div>
                     <Label htmlFor="name">Product Name</Label>
                     <Input
                       id="name"
                       value={formData.name}
                       onChange={(e) => handleInputChange('name', e.target.value)}
+                      onBlur={() => handleFieldBlur('name')}
                       placeholder="Enter product name"
                       required
+                      className={touched.name && errors.name ? 'border-red-500' : ''}
                     />
+                    {touched.name && errors.name && (
+                      <div className="text-red-500 text-sm mt-1">{errors.name}</div>
+                    )}
                   </div>
 
                   <div>
@@ -388,50 +538,63 @@ const ProductFormPage = () => {
                       onChange={(e) => handleInputChange('slug', e.target.value)}
                       placeholder="Enter product slug"
                     />
-                  </div>
-
-                  <div>
+                  </div>                  <div>
                     <Label htmlFor="description">Description</Label>
                     <Textarea
                       id="description"
                       value={formData.description}
                       onChange={(e) => handleInputChange('description', e.target.value)}
+                      onBlur={() => handleFieldBlur('description')}
                       placeholder="Enter product description"
                       rows={4}
+                      className={touched.description && errors.description ? 'border-red-500' : ''}
                     />
-                  </div>
-
-                  <div className="grid gap-4 md:grid-cols-2">
+                    {touched.description && errors.description && (
+                      <div className="text-red-500 text-sm mt-1">{errors.description}</div>
+                    )}
+                  </div>                  <div className="grid gap-4 md:grid-cols-2">
                     <div>
                       <Label htmlFor="price">Price (IDR)</Label>
                       <Input
                         id="price"
-                        type="number"
+                        type="text"
                         value={formData.price}
                         onChange={(e) => handleInputChange('price', e.target.value)}
+                        onBlur={() => handleFieldBlur('price')}
                         placeholder="0"
                         required
+                        className={touched.price && errors.price ? 'border-red-500' : ''}
                       />
+                      {touched.price && errors.price && (
+                        <div className="text-red-500 text-sm mt-1">{errors.price}</div>
+                      )}
                     </div>
 
                     <div>
                       <Label htmlFor="stock">Stock</Label>
                       <Input
                         id="stock"
-                        type="number"
+                        type="text"
                         value={formData.stock}
                         onChange={(e) => handleInputChange('stock', e.target.value)}
+                        onBlur={() => handleFieldBlur('stock')}
                         placeholder="0"
+                        className={touched.stock && errors.stock ? 'border-red-500' : ''}
                       />
+                      {touched.stock && errors.stock && (
+                        <div className="text-red-500 text-sm mt-1">{errors.stock}</div>
+                      )}
                     </div>
-                  </div>                  <div className="grid gap-4 md:grid-cols-2">
-                    <div>
-                      <Label htmlFor="category">Category</Label>
+                  </div><div className="grid gap-4 md:grid-cols-2">
+                    <div>                      <Label htmlFor="category">Category</Label>
                       <select
                         id="category"
                         value={formData.category_id}
                         onChange={(e) => handleInputChange('category_id', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        onBlur={() => handleFieldBlur('category_id')}
+                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                          touched.category_id && errors.category_id ? 'border-red-500' : 'border-gray-300'
+                        }`}
                         required
                       >
                         <option value="">Select Category</option>
@@ -441,6 +604,9 @@ const ProductFormPage = () => {
                           </option>
                         ))}
                       </select>
+                      {touched.category_id && errors.category_id && (
+                        <div className="text-red-500 text-sm mt-1">{errors.category_id}</div>
+                      )}
                     </div>
                   </div><div>
                     <Label>Main Product Image</Label>
@@ -591,7 +757,8 @@ const ProductFormPage = () => {
                     <Label htmlFor="featured">Featured Product</Label>
                   </div>
                 </CardContent>
-              </Card>              {/* Colors, Cap Patterns, Tiedye Patterns */}
+              </Card>              
+              {/* Colors, Cap Patterns, Tiedye Patterns */}
               <Card>
                 <CardHeader>
                   <CardTitle>Filters</CardTitle>
@@ -672,7 +839,8 @@ const ProductFormPage = () => {
                     </div>
                   </div>
                 </CardContent>
-              </Card>              {/* Stamping Tools */}
+              </Card>              
+              {/* Stamping Tools */}
               <Card>
                 <CardHeader>
                   <CardTitle>Stamping Tools</CardTitle>
@@ -680,7 +848,8 @@ const ProductFormPage = () => {
                     Tools used for creating this batik
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">                  {/* Add Stamping Tool Form */}
+                <CardContent className="space-y-4">                  
+                  {/* Add Stamping Tool Form */}
                   <div>
                     <Label>Add Stamping Tool</Label>
                     <div className="space-y-2">
@@ -692,7 +861,8 @@ const ProductFormPage = () => {
                       
                       {/* Image Upload or URL */}
                       <div className="space-y-2">
-                        <Label className="text-sm">Tool Image</Label>                        <div className="flex items-center space-x-2">
+                        <Label className="text-sm">Tool Image</Label>                        
+                        <div className="flex items-center space-x-2">
                           <Input
                             id="stamping-tool-image-upload"
                             type="file"
@@ -758,7 +928,8 @@ const ProductFormPage = () => {
                   {/* Current Stamping Tools */}
                   {formData.stamping_tools.length > 0 && (
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium">Current Tools:</Label>                      {formData.stamping_tools.map((tool, index) => (
+                      <Label className="text-sm font-medium">Current Tools:</Label>                      
+                      {formData.stamping_tools.map((tool, index) => (
                         <div key={index} className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded">
                           <div className="flex items-center space-x-3 flex-1 min-w-0">
                             {/* Tool Image */}

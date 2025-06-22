@@ -316,52 +316,45 @@ export const productService = {
     }
   },
 
-  // Get all categories for dropdown
-  async getAllCategories() {
-    const { data, error } = await supabase
-      .from('categories')
-      .select('id, name, slug, image_url, description')
-      .order('name');
-    
-    if (error) throw error;
-    return data;
-  },
-  // Get all filters
+  // Get all filters (colors, cap patterns, tiedye patterns)
   async getAllFilters() {
     try {
-      const [colorsRes, capRes, tiedyeRes] = await Promise.all([
+      const [colorsResult, capPatternsResult, tiedyePatternsResult] = await Promise.all([
         supabase.from('colors').select('*').order('name'),
         supabase.from('cap_patterns').select('*').order('name'),
         supabase.from('tiedye_patterns').select('*').order('name')
       ]);
 
+      if (colorsResult.error) throw colorsResult.error;
+      if (capPatternsResult.error) throw capPatternsResult.error;
+      if (tiedyePatternsResult.error) throw tiedyePatternsResult.error;
+
       return {
-        colors: colorsRes.data || [],
-        cap_patterns: capRes.data || [],
-        tiedye_patterns: tiedyeRes.data || []
+        colors: colorsResult.data || [],
+        cap_patterns: capPatternsResult.data || [],
+        tiedye_patterns: tiedyePatternsResult.data || []
       };
     } catch (error) {
       console.error('Error fetching filters:', error);
-      throw error;
-    }  },
-
-  // Simple update for individual fields (like featured toggle)
-  async updateProductFields(id, updates) {
-    try {
-      const { data, error } = await supabaseAdmin
-        .from('products')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('Error updating product fields:', error);
-      throw error;
+      return {
+        colors: [],
+        cap_patterns: [],
+        tiedye_patterns: []
+      };
     }
   },
+
+  // Get all categories (moved here for consistency)
+  async getAllCategories() {
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .order('name');
+    
+    if (error) throw error;
+    return data || [];
+  },
+
   // Upload stamping tool image
   async uploadStampingToolImage(imageFile, productId, toolIndex) {
     try {

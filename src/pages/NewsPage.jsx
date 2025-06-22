@@ -50,6 +50,11 @@ const NewsPage = () => {
       {/* Hero Section */}
       <section className="relative py-16 md:py-24 bg-secondary">
         <div className="absolute inset-0 batik-pattern opacity-10"></div>
+        <img
+          src="/images/berita_terkini.jpg"
+          alt="batik cap"
+          className="absolute inset-0 w-full h-full object-cover opacity-30"
+        />
         <div className="container mx-auto px-4 relative">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

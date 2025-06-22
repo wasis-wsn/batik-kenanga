@@ -186,11 +186,10 @@ class CompanyService {
       console.error('Error uploading profile image:', error);
       throw error;
     }
-  }
-  // Upload team member image with organized folder structure
-  async uploadTeamMemberImage(file, memberIndex, existingImageUrl = null) {
+  }  // Upload team member image with organized folder structure
+  async uploadTeamMemberImage(file, memberId, existingImageUrl = null) {
     try {
-      const imageUrl = await companyInfoService.uploadTeamMemberImage(file, memberIndex, existingImageUrl);
+      const imageUrl = await companyInfoService.uploadTeamMemberImage(file, memberId, existingImageUrl);
       return imageUrl;
     } catch (error) {
       console.error('Error uploading team member image:', error);
@@ -199,9 +198,9 @@ class CompanyService {
   }
 
   // Delete team member images
-  async deleteTeamMemberImages(memberIndex) {
+  async deleteTeamMemberImages(memberId) {
     try {
-      await companyInfoService.deleteTeamMemberImages(memberIndex);
+      await companyInfoService.deleteTeamMemberImages(memberId);
       return true;
     } catch (error) {
       console.error('Error deleting team member images:', error);
